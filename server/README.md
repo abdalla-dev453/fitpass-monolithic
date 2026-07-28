@@ -108,21 +108,6 @@ erDiagram
     }
 ```
 
-## What changed vs. the original `fit-hop` backend
-
-- **Models: 9 → 7.** `UserProfile` was folded directly into `User`
-  (full_name, phone, waiver_signed). The `MembershipPass` catalog +
-  `PurchasedPass` became a single `Pass` model — the plan catalog itself
-  (name/credits/price/duration) is just a constant dict in
-  `PassController.PASS_PLANS`, since it never needs per-request DB reads.
-  `Trainer` and `ClassCategory` were kept as their own tables/models.
-- **No blueprints.** All routes live directly in `main.py`, calling into
-  `controllers/`, same as `Monolithic-App`'s `main.py`.
-- **No `config.py` / `utils.py`.** Config is a few `os.getenv()` lines in
-  `main.py`; the one auth helper (`admin_required`) is a small decorator
-  in `main.py` too.
-- **One schema file per model** in `schemas/`, instead of a single
-  365-line `schemas.py`.
 
 ## Setup
 
