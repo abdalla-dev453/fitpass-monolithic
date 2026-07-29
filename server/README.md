@@ -71,7 +71,15 @@ erDiagram
 
     CLASS_CATEGORY {
         int id PK
-        string name UK
+        string name UKUSER ||--o| TRAINER : "has trainer profile"
+    USER ||--o{ PASS : purchases
+    USER ||--o{ BOOKING : makes
+
+    STUDIO ||--o{ FITNESS_CLASS : hosts
+    TRAINER ||--o{ FITNESS_CLASS : teaches
+    CLASS_CATEGORY ||--o{ FITNESS_CLASS : categorizes
+    FITNESS_CLASS ||--o{ BOOKING : "is booked in"
+
     }
 
     FITNESS_CLASS {
