@@ -1,0 +1,54 @@
+from datetime import datetime, timedelta, timezone
+from extensions import db
+from models.pass_model import Pass
+
+# The old MembershipPass "catalog" table never changed per-request, so its
+# options now live here as plain constants. Each purchase snapshots one of
+# these plans into a new Pass row.
+PASS_PLANS = {
+    "drop-in": {"name": "Single Class Drop-In", "credits": 1, "price": 25.00, "duration_days": 30},
+    "10-pack": {"name": "10-Class Flex Pass", "credits": 10, "price": 180.00, "duration_days": 90},
+    "monthly": {"name": "Monthly Unlimited", "credits": 99, "price": 150.00, "duration_days": 30},
+}
+
+
+class PassController:
+    @classmethod
+    def list_plans(cls):
+        return [{"key": key, **plan} for key, plan in PASS_PLANS.items()]
+
+    @classmethod
+    def get_user_passes(cls, user_id):
+        return Pass.query.filter_by(user_id=user_id).order_by(Pass.purchased_at.desc()).all()
+
+    @classmethod
+    def purchase_plan(cls, user_id, plan_key):
+        plan = PASS_PLANS.get(plan_key)
+        if not plan:
+            return None
+
+        expires_at = datetime.now(timezone.utc) + timedelta(days=plan["duration_days"])
+        purchased = Pass(
+            user_id=user_id,
+            plan_name=plan["name"],
+            credits=plan["credits"],
+            remaining_credits=plan["credits"],
+            price=plan["price"],
+            expires_at=expires_at,
+        )
+        db.session.add(purchased)
+        db.session.commit()
+        return purchased
+
+    @classmethod
+    def get_active_pass(cls, user_id):
+        now = datetime.now(timezone.utc)
+        return (
+            Pass.query.filter(
+                Pass.user_id == user_id,
+                Pass.remaining_credits > 0,
+                Pass.expires_at > now,
+            )
+            .order_by(Pass.expires_at.asc())
+            .first()
+        )

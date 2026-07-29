@@ -16,6 +16,24 @@ from models.fitness_class import FitnessClass
 from models.pass_model import Pass    
 from models.booking import Booking    
 
+
+from controllers.user_controller import UserController
+from controllers.studio_controller import StudioController
+from controllers.trainer_controller import TrainerController
+from controllers.class_controller import ClassController
+from controllers.pass_controller import PassController
+from controllers.booking_controller import BookingController
+
+
+from schemas.user_schema import user_schema, register_schema, login_schema
+from schemas.studio_schema import studio_schema, studios_schema
+from schemas.trainer_schema import trainers_schema
+from schemas.class_category_schema import categories_schema
+from schemas.class_schema import class_schema, classes_schema
+from schemas.pass_schema import pass_schema, passes_schema
+from schemas.booking_schema import booking_schema, bookings_schema
+
+
 load_dotenv()
 
 app = Flask(__name__)
