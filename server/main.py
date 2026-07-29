@@ -1,55 +1,78 @@
 import os
-from functools import wraps
+from flask import Flask, jsonify
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
 from marshmallow import ValidationError
-from flask_cors import CORS 
 
 from extensions import db, jwt, cors, migrate, ma
 
-# Import models so Flask-Migrate / SQLAlchemy metadata picks them up
-from models.user import User          
-from models.studio import Studio      
-from models.trainer import Trainer    
-from models.class_category import ClassCategory  
-from models.fitness_class import FitnessClass    
-from models.pass_model import Pass    
-from models.booking import Booking    
+# Import blueprints
+from blueprints.auth import auth_bp
+from blueprints.studios import studios_bp
+from blueprints.classes import classes_bp
+from blueprints.passes import passes_bp
+from blueprints.bookings import bookings_bp
 
-
-from controllers.user_controller import UserController
-from controllers.studio_controller import StudioController
-from controllers.trainer_controller import TrainerController
-from controllers.class_controller import ClassController
-from controllers.pass_controller import PassController
-from controllers.booking_controller import BookingController
-
-
-from schemas.user_schema import user_schema, register_schema, login_schema
-from schemas.studio_schema import studio_schema, studios_schema
-from schemas.trainer_schema import trainers_schema
-from schemas.class_category_schema import categories_schema
-from schemas.class_schema import class_schema, classes_schema
-from schemas.pass_schema import pass_schema, passes_schema
-from schemas.booking_schema import booking_schema, bookings_schema
-
+# Import models so Flask-Migrate picks them up
+import models.user         
+import models.studio       
+import models.trainer     
+import models.class_category 
+import models.fitness_class   
+import models.pass_model   
+import models.booking     
 
 load_dotenv()
 
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret")
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-jwt-secret")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Initialize extensions
-db.init_app(app)
-jwt.init_app(app)
-migrate.init_app(app, db)
-ma.init_app(app)
+def create_app():
+    app = Flask(__name__)
 
-# This permits your local React app (Vite defaults to port 5173) to read your API responses
-CORS(app, resources={r"/*": {"origins": "*"}})
+    # Configuration settings
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret")
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-jwt-secret")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # Initialize extensions
+    db.init_app(app)
+    jwt.init_app(app)
+    migrate.init_app(app, db)
+    ma.init_app(app)
+
+    # CORS Setup
+    allowed_origins = os.getenv(
+        "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    cors.init_app(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
+
+    # Register Blueprints
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(studios_bp, url_prefix="/studios")
+    app.register_blueprint(classes_bp, url_prefix="/classes")
+    app.register_blueprint(passes_bp, url_prefix="/passes")
+    app.register_blueprint(bookings_bp, url_prefix="/bookings")
+
+    # Global Error Handlers
+    @app.errorhandler(404)
+    def not_found(err):
+        return jsonify({"error": "Resource not found"}), 404
+
+    @app.errorhandler(500)
+    def internal_error(err):
+        return jsonify({"error": "Internal server error"}), 500
+
+    @app.errorhandler(ValidationError)
+    def bad_request(err):
+        return jsonify({"error": "Validation failed", "messages": err.messages}), 400
+
+    # System Health check
+    @app.route("/healthcheck")
+    def healthcheck():
+        return jsonify({"status": "online", "message": "FitPass API is active"}), 200
+
+    return app
+
 
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True)
