@@ -9,9 +9,9 @@ export function formatClassTime(iso) {
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
-    });
+    }).toUpperCase(); // Forced structural uppercase string conversion standard
   } catch {
-    return iso;
+    return iso ? iso.toUpperCase() : iso;
   }
 }
 
@@ -20,53 +20,68 @@ export default function ClassCard({ fitnessClass }) {
   const isFull = typeof spots === "number" && spots <= 0;
 
   return (
-    <div className="glass glass-hover rounded-2xl overflow-hidden flex flex-col">
-      <div className="p-6 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          {fitnessClass.category_name && (
-            <span className="inline-flex text-[11px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-2.5 py-1">
+    <div className="border-2 border-zinc-800 bg-zinc-950 rounded-none overflow-hidden flex flex-col justify-between transition-all duration-150 transform hover:-translate-x-1 hover:-translate-y-1 hover:border-[#CCFF00]/50 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.02)] hover:shadow-[6px_6px_0px_0px_rgba(204,255,0,1)]">
+      <div className="p-5 md:p-6 flex-1">
+        
+        {/* UPPER STATUS DISPATCH LAYER */}
+        <div className="flex items-center justify-between gap-3 pb-4 border-b border-zinc-900">
+          {fitnessClass.category_name ? (
+            <span className="bg-[#CCFF00] text-black font-sans font-black tracking-widest text-[9px] uppercase px-2.5 py-1 border border-black">
               {fitnessClass.category_name}
             </span>
+          ) : (
+            <div />
           )}
+          
           <span
-            className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
+            className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border ${
               isFull
-                ? "bg-red-400/10 text-red-300 border border-red-400/20"
-                : "bg-white/5 text-slate-300 border border-white/10"
+                ? "bg-red-950/40 text-red-500 border-red-900/60 animate-pulse"
+                : "bg-zinc-900 text-zinc-400 border-zinc-800"
             }`}
           >
-            <Users size={12} />
-            {isFull ? "Full" : `${spots ?? "—"} spots left`}
+            <Users size={11} strokeWidth={2.5} />
+            {isFull ? "FULL CAPACITY" : `${spots ?? "—"} SPOTS REMAINING`}
           </span>
         </div>
 
-        <h3 className="mt-4 font-display font-semibold text-lg text-white">
+        {/* CORE DETAILS TYPOGRAPHY ACCENT */}
+        <h3 className="mt-4 font-display font-black text-xl text-white tracking-tight uppercase leading-none">
           {fitnessClass.title}
         </h3>
+        
         {fitnessClass.description && (
-          <p className="mt-1.5 text-sm text-slate-400 leading-relaxed line-clamp-2">
+          <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500 leading-normal line-clamp-2 min-h-[30px]">
             {fitnessClass.description}
           </p>
         )}
 
-        <div className="mt-5 space-y-2 text-sm text-slate-300">
+        {/* RUNTIME PARAMS FOOTNOTE GRID */}
+        <div className="mt-5 pt-4 border-t border-zinc-900 space-y-2.5 text-[11px] font-black tracking-widest text-zinc-300 uppercase">
           <div className="flex items-center gap-2">
-            <Clock size={14} className="text-slate-500 shrink-0" />
-            {formatClassTime(fitnessClass.start_time)}
+            <Clock size={13} className="text-zinc-600 shrink-0" strokeWidth={2.5} />
+            <span>{formatClassTime(fitnessClass.start_time)}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-slate-500 shrink-0" />
-            {fitnessClass.studio_name || "Studio TBD"}
-            {fitnessClass.trainer_name && ` · ${fitnessClass.trainer_name}`}
+          <div className="flex items-center gap-2 truncate">
+            <MapPin size={13} className="text-zinc-600 shrink-0" strokeWidth={2.5} />
+            <span className="truncate">
+              {fitnessClass.studio_name || "STATION TBD"}
+              {fitnessClass.trainer_name && ` • COACH ${fitnessClass.trainer_name}`}
+            </span>
           </div>
         </div>
       </div>
 
+      {/* HEAVY INTENSITY FOOTER RESERVATION ACTION BUTTON */}
       <button
         disabled={isFull}
-        className="w-full py-3 text-sm font-semibold border-t border-white/10 text-slate-950 bg-emerald-400 transition-colors hover:bg-emerald-300 disabled:bg-white/5 disabled:text-slate-500 disabled:cursor-not-allowed disabled:hover:bg-white/5"
+        className={`w-full py-3.5 font-display text-xs font-black uppercase tracking-widest transition-all duration-100 border-t-2 border-transparent ${
+          isFull
+            ? "bg-zinc-900 text-zinc-600 cursor-not-allowed border-zinc-900"
+            : "bg-[#CCFF00] text-black border-[#CCFF00] hover:bg-white hover:text-black hover:border-white"
+        }`}
       >
-        {isFull ? "Class full" : "Reserve your spot"}
+        {isFull ? "STATION CAPACITY FULL" : "RESERVE ACCOUNT SPOT"}
       </button>
     </div>
   );
