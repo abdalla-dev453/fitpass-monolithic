@@ -5,62 +5,73 @@ import SectionHeading from "./SectionHeading.jsx";
 const FEATURES = [
   {
     icon: Zap,
-    title: "Instant, real-time booking",
+    title: "INSTANT REAL-TIME DISPATCH",
     description:
-      "Live spot counts on every class. Reserve your mat or bench the moment you decide — no waitlists, no phone calls.",
+      "LIVE SLOT CAPACITIES CAPTURED ON EVERY CLASS. RESTRUCTURING YOUR RESERVATION THE MOMENT YOU ENGAGE — NO WAITING LOOPS.",
   },
   {
     icon: CreditCard,
-    title: "Flexible credit passes",
+    title: "FLEXIBLE CREDIT PACK TIERS",
     description:
-      "Buy credits once, spend them anywhere in the network. Drop in for one class or go unlimited for the month.",
+      "PROCURE CREDITS ONCE, ALLOCATE THEM ANYWHERE IN THE PIPELINE. DROP IN FOR ONE DRILL OR OVERRIDE WITH UNLIMITED MONTHLY TIERS.",
   },
   {
     icon: ShieldCheck,
-    title: "Verified studios & trainers",
+    title: "VETTED STATIONS & COACHES",
     description:
-      "Every partner studio and coach on FitPass is vetted for safety, certification, and consistent class quality.",
+      "EVERY SINGLE PARTNER OPERATION ON FITPASS IS RIGIDLY VERIFIED FOR ACCREDITATION AND ACCELERATED PERFORMANCE QUALITY STABILITY.",
   },
   {
     icon: Search,
-    title: "Search across the whole city",
+    title: "CITYWIDE PIPELINE SEARCH",
     description:
-      "Filter by category, studio, trainer, or time slot to find the exact session that fits your schedule.",
+      "FILTER TRACKS BY TIER CATEGORY, SPECIFIC DISCIPLINE BOX, OR TIMELINE COORDINATES TO LOCATE YOUR EXACT REQUIRED SESSION STATION.",
   },
   {
     icon: RefreshCw,
-    title: "Cancel and rebook freely",
+    title: "FAULT-FREE DISPATCH RESETS",
     description:
-      "Plans change. Cancel before a class starts and your credit is refunded automatically — every time.",
+      "PLANS SHIFT. HALT DISPATCH TARGET VALUES BEFORE CLASSES COMMENCE AND RECLAIM CORE TOKEN REFUNDS AUTOMATICALLY.",
   },
   {
     icon: Star,
-    title: "Rate every session",
+    title: "OPERATIONAL ACCOUNT RATINGS",
     description:
-      "Leave a rating and review after class so the next member knows exactly what they're booking.",
+      "LOG REVIEWS DIRECTLY INTO THE DATABASE PROFILE AFTER SESSIONS SO THE NEXT ATHLETE CAN VERIFY DISPATCH ACCURACY.",
   },
 ];
 
 export default function Features() {
   return (
-    <section className="relative py-24 md:py-32">
+    <section className="relative py-24 bg-[#0B0C10] text-white select-none border-b-2 border-zinc-900 bg-gym-grid">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <SectionHeading
-          eyebrow="Why FitPass"
-          title="Everything a modern membership should be."
-          description="No front-desk lines, no paper waivers, no expired punch cards. Just a network of great studios, unlocked by one account."
-        />
+        
+        {/* Upper Split Border */}
+        <div className="border-b-4 border-zinc-800 pb-4">
+          <SectionHeading
+            eyebrow="SYSTEM ENFORCEMENTS"
+            title="EVERYTHING AN INTENSIVE MEMBERSHIP NETWORK SHOULD DEPLOY."
+            description="NO FRONT-DESK WAITING LINES. NO EXPIRED ANALOG HARD CARDS. JUST ONE ELITE CONNECTIVE ARCHITECTURE."
+          />
+        </div>
 
-        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Aggressive Grid Metrics Distribution */}
+        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURES.map(({ icon: Icon, title, description }) => (
-            <div key={title} className="group glass glass-hover rounded-2xl p-7">
-              <div className="h-11 w-11 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center group-hover:bg-emerald-400/20 transition-colors">
-                <Icon size={20} className="text-emerald-400" />
+            <div 
+              key={title} 
+              className="group border-2 border-zinc-800 bg-zinc-950 p-6 rounded-none transition-all duration-150 transform hover:-translate-x-1 hover:-translate-y-1 hover:border-[#CCFF00]/50 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.02)] hover:shadow-[6px_6px_0px_0px_rgba(204,255,0,1)]"
+            >
+              {/* Boxed Hard High-Contrast Icon Frame */}
+              <div className="h-10 w-10 bg-zinc-900 border border-zinc-800 text-[#CCFF00] flex items-center justify-center transition-colors group-hover:bg-[#CCFF00] group-hover:text-black group-hover:border-[#CCFF00]">
+                <Icon size={16} strokeWidth={2.5} />
               </div>
-              <h3 className="mt-5 font-display font-semibold text-lg text-white">
+              
+              <h3 className="mt-5 font-display font-black text-lg text-white uppercase tracking-tight">
                 {title}
               </h3>
-              <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+              
+              <p className="mt-2 text-[11px] font-bold uppercase tracking-wider text-zinc-400 leading-relaxed">
                 {description}
               </p>
             </div>
