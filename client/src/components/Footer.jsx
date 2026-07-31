@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Activity, Instagram, Twitter, Facebook, Youtube, ArrowRight, Check } from "lucide-react";
+import { Activity, Instagram, Twitter, FacebookIcon, Youtube, ArrowRight, Check } from "lucide-react";
 
 const COLUMNS = [
   {
@@ -63,7 +63,7 @@ export default function Footer() {
             </p>
 
             <div className="mt-6 flex items-center gap-3">
-              {[Instagram, Twitter, Facebook, Youtube].map((Icon, i) => (
+              {[Instagram, Twitter, FacebookIcon, Youtube].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
