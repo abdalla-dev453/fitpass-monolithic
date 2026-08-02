@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { AlertCircle, HelpCircle, Check, ShieldAlert } from "lucide-react";
+import { AlertCircle, HelpCircle, Check } from "lucide-react";
 import SectionHeading from "../components/SectionHeading.jsx";
 import Faq from "../components/Faq.jsx";
 import api from "../lib/api.js";
-
-import banner from "../assets/pricing.jpeg";
 
 
 const FALLBACK_PLANS = [

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../context/AppContext.jsx";
-import { Menu, X, LogOut, User as UserIcon, ShieldAlert } from "lucide-react";
+import { Menu, X, LogOut, User as UserIcon } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout, mobileMenuOpen, setMobileMenuOpen } = useApp();
@@ -27,7 +27,7 @@ export default function Navbar() {
     { 
       path: "/classes", 
       label: "CLASSES COMMAND", 
-      visible: user && ["trainer", "admin"].includes(user.role) 
+      visible: true
     },
     
     // Strict admin override route placeholder
@@ -81,7 +81,7 @@ export default function Navbar() {
             <div className="flex items-center gap-4 bg-zinc-950/30 border border-zinc-800/40 pl-4 pr-2 py-1.5 rounded-xl">
               {/* CLEARANCE VISUAL ANCHOR CHIP */}
               <div className="flex flex-col items-end pr-2 border-r border-zinc-800/60">
-                <span className="text-[10px] font-bold text-gray-200 uppercase tracking-wider">{user.name}</span>
+                <span className="text-[10px] font-bold text-gray-200 uppercase tracking-wider">{user.full_name}</span>
                 <span className="text-[7px] font-black text-[#CCFF00] tracking-[0.15em] uppercase mt-0.5">
                   {user.role === "user" ? "ATHLETE" : user.role}
                 </span>
@@ -159,7 +159,7 @@ export default function Navbar() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between bg-zinc-950/40 p-3.5 border border-zinc-800/60 rounded-xl">
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-bold uppercase text-gray-200 tracking-wide">{user.name}</span>
+                    <span className="text-[11px] font-bold uppercase text-gray-200 tracking-wide">{user.full_name}</span>
                     <span className="text-[8px] font-black tracking-widest text-[#CCFF00] uppercase mt-0.5">{user.role} INTERFACE</span>
                   </div>
                   <Link 

@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
 
 from controllers.booking_controller import BookingController
-from schemas.booking_schema import booking_schema, bookings_schema
+from schemas.booking_schema import booking_schema, bookings_schema, create_booking_schema
 
 
 bookings_bp = Blueprint("bookings_bp", __name__)
@@ -18,14 +18,16 @@ def get_my_bookings():
 @bookings_bp.route("", methods=["POST"])
 @jwt_required()
 def create_booking():
-    json_data = request.get_json()
+    json_data = request.get_json(silent=True)
     try:
-        data = booking_schema.load(json_data)
+        data = create_booking_schema.load(json_data)
     except ValidationError as err:
         return jsonify({"error": "Validation failed", "messages": err.messages}), 422
 
     user_id = get_jwt_identity()
-    booking = BookingController.create_booking(user_id, data)
+    booking, error = BookingController.create_booking(user_id, data["class_id"])
+    if error:
+        return jsonify({"error": error}), 400
     return jsonify({
         "message": "Booking created successfully",
         "booking": booking_schema.dump(booking)
@@ -34,8 +36,7 @@ def create_booking():
 @bookings_bp.route("/<int:booking_id>/cancel", methods=["POST"])
 @jwt_required()
 def cancel_booking(booking_id):
-    user_id = int(get_jwt_identity())
-    success = BookingController.cancel_booking(user_id, booking_id)
+    success = BookingController.cancel_booking(get_jwt_identity(), booking_id)
     if not success:
         return jsonify({"error": "Could not cancel booking"}), 400
     return jsonify({"message": "Booking canceled successfully"}), 200

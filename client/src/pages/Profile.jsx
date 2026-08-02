@@ -71,7 +71,7 @@ export default function Profile() {
                 IDENTITY PROFILE PASSPORT
               </span>
               <h1 className="font-display font-black text-2xl md:text-3xl uppercase tracking-tighter text-white">
-                {user?.name || "ANONYMOUS_ATHLETE"}
+                {user?.full_name || "ANONYMOUS_ATHLETE"}
               </h1>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 font-mono">
                 NET_ID // {user?.email}
@@ -83,7 +83,7 @@ export default function Profile() {
           <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 p-3 w-full md:w-auto justify-between">
             <div className="text-right">
               <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">SECURITY RANK LAYER</p>
-              <p className="text-xs font-black uppercase tracking-widest text-[#CCFF00]">{user?.role === "user" ? "ATHLETE NODE" : `${user?.role} NODE`}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#CCFF00]">{user?.role === "client" ? "ATHLETE NODE" : `${user?.role} NODE`}</p>
             </div>
             <ShieldCheck size={20} className="text-[#CCFF00]" strokeWidth={2.5} />
           </div>

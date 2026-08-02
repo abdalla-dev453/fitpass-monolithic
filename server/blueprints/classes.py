@@ -38,7 +38,7 @@ def get_class(class_id):
 @classes_bp.route("/", methods=["POST"])
 @admin_required
 def create_class():
-    json_data =  request.get_json()
+    json_data = request.get_json(silent=True)
     try:
         loaded_data = class_schema.load(json_data)
     except ValidationError as err:

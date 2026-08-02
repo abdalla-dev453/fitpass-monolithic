@@ -8,7 +8,7 @@ class StudioController:
     def get_all_studios(cls, location=None):
         query = Studio.query
         if location:
-            query.filter(Studio.location.ilike(f"%{location}"))
+            query = query.filter(Studio.location.ilike(f"%{location.strip()}%"))
         return query.all()
 
     @classmethod

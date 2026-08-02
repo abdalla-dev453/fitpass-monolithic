@@ -1,14 +1,15 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from extensions import db
 from models.booking import Booking
 from models.pass_model import Pass
+from models.fitness_class import FitnessClass
 from controllers.pass_controller import PassController
 
 
 class BookingController:
     @classmethod
     def get_user_bookings(cls, user_id):
-        return Booking.query.filter_by(user_id=user_id).order_by(Booking.id.desc()).all()
+        return Booking.query.filter_by(user_id=int(user_id)).order_by(Booking.id.desc()).all()
 
     @classmethod
     def get_booking(cls, booking_id, user_id):
@@ -21,6 +22,17 @@ class BookingController:
     @classmethod
     def create_booking(cls, user_id, class_id):
         """Spends one credit from the user's soonest-expiring active pass."""
+        user_id = int(user_id)
+        fitness_class = db.session.get(FitnessClass, class_id)
+        if not fitness_class:
+            return None, "Class not found."
+        if fitness_class.start_time <= datetime.utcnow():
+            return None, "This class has already started."
+        if cls.already_booked(user_id, class_id):
+            return None, "You already have a booking for this class."
+        if fitness_class.bookings.count() >= fitness_class.capacity:
+            return None, "This class is full."
+
         active_pass = PassController.get_active_pass(user_id)
         if not active_pass:
             return None, "No valid pass with available credits. Please purchase a pass first."
@@ -32,10 +44,14 @@ class BookingController:
         return booking, None
 
     @classmethod
-    def cancel_booking(cls, booking):
+    def cancel_booking(cls, user_id, booking_id):
+        booking = cls.get_booking(booking_id, int(user_id))
+        if not booking:
+            return False
+
         # Refund a credit to the user's most recently-expiring pass if the
         # class hasn't started yet.
-        if booking.fitness_class.start_time.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
+        if booking.fitness_class.start_time > datetime.utcnow():
             active_pass = (
                 Pass.query.filter_by(user_id=booking.user_id)
                 .order_by(Pass.expires_at.desc())
@@ -46,6 +62,7 @@ class BookingController:
 
         db.session.delete(booking)
         db.session.commit()
+        return True
 
     @classmethod
     def submit_review(cls, booking, rating, review_text):

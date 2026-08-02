@@ -9,7 +9,7 @@ auth_bp = Blueprint("auth_bp", __name__)
 # Register new user
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    json_data = request.get_json()
+    json_data = request.get_json(silent=True)
     try:
         data = register_schema.load(json_data)
     except ValidationError as err:
@@ -32,7 +32,7 @@ def register():
 # Login user
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    json_data = request.get_json()
+    json_data = request.get_json(silent=True)
     try:
         data = login_schema.load(json_data)
     except ValidationError as err:

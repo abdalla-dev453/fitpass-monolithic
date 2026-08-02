@@ -15,7 +15,7 @@ export default function Login() {
   // Proactive redirection: If user is logged in, kick them out of login page
   useEffect(() => {
     if (user) {
-      navigate("/classes");
+      navigate(user.role === "admin" ? "/admin-dashboard" : "/classes");
     }
   }, [user, navigate]);
 

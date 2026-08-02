@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext.jsx";
-import { ArrowRight, ShieldAlert, KeyRound, Mail, User, ShieldCheck, Dumbbell } from "lucide-react";
+import { ArrowRight, ShieldAlert, KeyRound, Mail, User } from "lucide-react";
 
 export default function Register() {
   const { register, user, showToast } = useApp();
@@ -11,8 +11,7 @@ export default function Register() {
     full_name: "",
     email: "", 
     password: "", 
-    phone: "",
-    role: "client" // Default fallback role selection (must match backend: client/trainer/admin)
+    phone: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,7 +19,7 @@ export default function Register() {
   // Proactive redirection: If user is already logged in, redirect away from register
   useEffect(() => {
     if (user) {
-      navigate("/classes");
+      navigate(user.role === "admin" ? "/admin-dashboard" : "/classes");
     }
   }, [user, navigate]);
 
@@ -40,13 +39,6 @@ export default function Register() {
       setLoading(false);
     }
   };
-
-  // Role Configuration Map for UI styling
-  const roles = [
-    { key: "client", label: "ATHLETE", icon: User, desc: "Standard access node" },
-    { key: "trainer", label: "TRAINER", icon: Dumbbell, desc: "Command instruction modules" },
-    { key: "admin", label: "ADMIN", icon: ShieldCheck, desc: "Root infrastructure override" }
-  ];
 
   return (
     <div className="bg-[#0B0C10] text-white select-none min-h-screen flex items-center justify-center pt-28 pb-12 bg-gym-grid px-4">
@@ -127,36 +119,6 @@ export default function Register() {
                 placeholder="GENERATE SECURE CODE"
                 className="w-full bg-transparent pl-9 pr-3 py-2 text-xs font-black  tracking-widest text-white placeholder:text-zinc-700 focus:outline-none"
               />
-            </div>
-          </div>
-
-          {/* DYNAMIC ROLE MATRIX COMPONENT */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">CLEARANCE LAYER ACCESS ROLE</label>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map((roleObj) => {
-                const IconComponent = roleObj.icon;
-                const isSelected = form.role === roleObj.key;
-                return (
-                  <button
-                    key={roleObj.key}
-                    type="button"
-                    disabled={loading}
-                    onClick={() => setForm({ ...form, role: roleObj.key })}
-                    className={`flex flex-col items-center justify-center p-3 border-2 transition-all duration-150 ${
-                      isSelected 
-                        ? "border-[#CCFF00] bg-[#CCFF00]/5 text-[#CCFF00]" 
-                        : "border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
-                    }`}
-                  >
-                    <IconComponent size={16} strokeWidth={2.5} className="mb-1" />
-                    <span className="text-[9px] font-black tracking-widest uppercase">{roleObj.label}</span>
-                    <span className="text-[6px] font-medium tracking-normal text-zinc-600 mt-0.5 text-center hidden md:block">
-                      {roleObj.desc}
-                    </span>
-                  </button>
-                );
-              })}
             </div>
           </div>
 

@@ -1,5 +1,3 @@
-from ast import dump
-
 from marshmallow import fields, validate, validates_schema, ValidationError
 from extensions import ma
 from models.fitness_class import FitnessClass
@@ -7,14 +5,14 @@ from models.fitness_class import FitnessClass
 
 class FitnessClassSchema(ma.SQLAlchemyAutoSchema):
     studio_name = fields.String(attribute="studio.name", dump_only=True)
-    tainer_name = fields.String(attribute="trainer.user.full_name", dump_only=True)
+    trainer_name = fields.String(attribute="trainer.user.full_name", dump_only=True)
     category_name = fields.String(attribute="category.name", dump_only=True)
     spots_remaining = fields.Method('get_spots_remaining', dump_only=True)
 
     class Meta:
         model = FitnessClass
         load_instance = True
-        imclude_fk = True
+        include_fk = True
 
     title = fields.String(required=True, validate=validate.Length(min=2, max=100))
     capacity = fields.Integer(required=True, validate=validate.Range(min=1))

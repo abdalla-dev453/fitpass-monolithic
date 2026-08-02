@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Play, MapPin, Users, Star, Activity, User, CreditCard } from "lucide-react";
+import { ArrowRight, Play, MapPin, Users, Star, CreditCard } from "lucide-react";
 import gymBanner from "../assets/class.jpeg";
 
 const STATS = [

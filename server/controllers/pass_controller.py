@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from extensions import db
 from models.pass_model import Pass
 
@@ -24,7 +24,7 @@ class PassController:
         if not plan:
             return None
 
-        expires_at = datetime.now(timezone.utc) + timedelta(days=plan["duration_days"])
+        expires_at = datetime.utcnow() + timedelta(days=plan["duration_days"])
         purchased = Pass(
             user_id=user_id,
             plan_name=plan["name"],
@@ -39,7 +39,7 @@ class PassController:
 
     @classmethod
     def get_active_pass(cls, user_id):
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         return (
             Pass.query.filter(
                 Pass.user_id == user_id,

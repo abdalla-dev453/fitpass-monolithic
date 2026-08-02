@@ -9,6 +9,7 @@ class ClassController:
     @classmethod
     def search_classes(cls, studio_id=None, category_id=None, trainer_id=None, q=None,
                         start_date=None, end_date=None):
+        """Search fitness classes with optional filtering."""
         query = FitnessClass.query
 
         query = query.filter(FitnessClass.start_time >= (start_date or datetime.utcnow()))
@@ -30,18 +31,33 @@ class ClassController:
 
     @classmethod
     def get_class_by_id(cls, class_id):
-        return db.session.get(FitnessClass, class_id)
+        """Retrieve a single fitness class by ID."""
+        try:
+            return db.session.get(FitnessClass, class_id)
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Failed to retrieve class {class_id}: {str(e)}")
 
     @classmethod
     def create_class(cls, fitness_class):
-        db.session.add(fitness_class)
-        db.session.commit()
-        return fitness_class
+        """Create and persist a new fitness class."""
+        try:
+            db.session.add(fitness_class)
+            db.session.commit()
+            return fitness_class
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Failed to create class: {str(e)}")
 
     @classmethod
     def count_bookings(cls, fitness_class):
-        return fitness_class.bookings.count()
+        """Get booking count for a fitness class."""
+        return len(fitness_class.bookings) if fitness_class.bookings else 0
 
     @classmethod
     def get_categories(cls):
-        return ClassCategory.query.all()
+        """Retrieve all fitness class categories."""
+        try:
+            return ClassCategory.query.all()
+        except Exception as e:
+            raise ValueError(f"Failed to retrieve categories: {str(e)}")

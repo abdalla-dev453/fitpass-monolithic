@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Clock, MapPin, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useApp } from "../context/AppContext.jsx";
+import api from "../lib/api.js";
 
-export function formatClassTime(iso) {
+function formatClassTime(iso) {
   try {
     return new Date(iso).toLocaleString(undefined, {
       weekday: "short",
@@ -16,8 +19,29 @@ export function formatClassTime(iso) {
 }
 
 export default function ClassCard({ fitnessClass }) {
+  const { user, showToast } = useApp();
+  const navigate = useNavigate();
+  const [isBooking, setIsBooking] = useState(false);
   const spots = fitnessClass.spots_remaining;
   const isFull = typeof spots === "number" && spots <= 0;
+
+  const reserveSpot = async () => {
+    if (!user) {
+      showToast("Please log in before reserving a class.");
+      navigate("/login");
+      return;
+    }
+
+    setIsBooking(true);
+    try {
+      await api.createBooking(fitnessClass.id);
+      showToast("Your class reservation is confirmed.");
+    } catch (error) {
+      showToast(error.message || "Unable to reserve this class.");
+    } finally {
+      setIsBooking(false);
+    }
+  };
 
   return (
     <div className="border-2 border-zinc-800 bg-zinc-950 rounded-none overflow-hidden flex flex-col justify-between transition-all duration-150 transform hover:-translate-x-1 hover:-translate-y-1 hover:border-[#CCFF00]/50 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.02)] hover:shadow-[6px_6px_0px_0px_rgba(204,255,0,1)]">
@@ -74,14 +98,15 @@ export default function ClassCard({ fitnessClass }) {
 
       {/* HEAVY INTENSITY FOOTER RESERVATION ACTION BUTTON */}
       <button
-        disabled={isFull}
+        disabled={isFull || isBooking}
+        onClick={reserveSpot}
         className={`w-full py-3.5 font-display text-xs font-black uppercase tracking-widest transition-all duration-100 border-t-2 border-transparent ${
           isFull
             ? "bg-zinc-900 text-zinc-600 cursor-not-allowed border-zinc-900"
             : "bg-[#CCFF00] text-black border-[#CCFF00] hover:bg-white hover:text-black hover:border-white"
         }`}
       >
-        {isFull ? "STATION CAPACITY FULL" : "RESERVE ACCOUNT SPOT"}
+        {isFull ? "STATION CAPACITY FULL" : isBooking ? "RESERVING..." : "RESERVE ACCOUNT SPOT"}
       </button>
     </div>
   );

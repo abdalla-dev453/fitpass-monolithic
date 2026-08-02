@@ -29,15 +29,16 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* --- ANY AUTHENTICATED USER (Athlete, Trainer, Admin) --- */}
-          <Route element={<ProtectedRoute allowedRoles={["user", "trainer", "admin"]} />}>
+          <Route path="/studios" element={<Studios />} />
+          <Route path="/classes" element={<Classes />} />
+
+          {/* --- ANY AUTHENTICATED USER (Client, Trainer, Admin) --- */}
+          <Route element={<ProtectedRoute allowedRoles={["client", "trainer", "admin"]} />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/studios" element={<Studios />} />
           </Route>
 
-          {/* --- STAFF COMMAND LAYER ONLY (Trainer & Admin) --- */}
-          <Route element={<ProtectedRoute allowedRoles={["trainer", "admin"]} />}>
-            <Route path="/classes" element={<Classes />} />
+          {/* --- ADMIN COMMAND LAYER ONLY --- */}
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
 
