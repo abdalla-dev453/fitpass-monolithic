@@ -1,11 +1,10 @@
 from marshmallow import fields, validate
 from extensions import ma
 from models.user import User
-from server.models import user
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = user
+        model = User
         load_instance = True
         exclude = ("password_hash",)
 
@@ -15,7 +14,7 @@ class UserRegistrationSchema(ma.Schema):
     password = fields.String(required=True, validate=validate.Length(min=8, max=100))
     full_name = fields.String(required=True, validate=validate.Length(min=2, max=100))
     phone = fields.String(validate=validate.Length(min=7, max=20))
-
+    role = fields.String(validate=validate.OneOf(["admin", "trainer", "member"]))
 
 class UserLoginSchema(ma.Schema):
     email = fields.Email(required=True)

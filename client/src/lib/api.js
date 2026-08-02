@@ -1,3 +1,6 @@
+import React from "react";
+
+//Vite expects environment variables to start with VITE_ to be exposed to client-side code
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 
 function getToken() {
@@ -6,7 +9,11 @@ function getToken() {
 
 async function request(path, options = {}) {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
+  
+  // Clean up any double slashes caused by path concatenation anomalies
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  
+  const res = await fetch(`${API_URL}${cleanPath}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -17,26 +24,27 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Request failed (${res.status})`);
+    // Forward the specific inner errors object if Marshmallow validation returns field arrays
+    throw new Error(body.messages ? JSON.stringify(body.messages) : body.error || `Request failed (${res.status})`);
   }
   return res.status === 204 ? null : res.json();
 }
 
 const api = {
-  // auth
+  // Auth Nodes (Addresses url_prefix configurations seamlessly)
   register: (payload) =>
     request("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
   login: (payload) =>
     request("/auth/login", { method: "POST", body: JSON.stringify(payload) }),
   getMe: () => request("/auth/me"),
 
-  // studios
+  // Studio Distribution Points
   getStudios: ({ location } = {}) =>
     request(`/studios/${location ? `?location=${encodeURIComponent(location)}` : ""}`),
   getStudio: (studioId) => request(`/studios/${studioId}`),
   getStudioSchedule: (studioId) => request(`/studios/${studioId}/schedule`),
 
-  // classes
+  // Class Engine Parameters
   getClasses: (params = {}) => {
     const qs = new URLSearchParams(
       Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
@@ -46,14 +54,14 @@ const api = {
   getCategories: () => request("/classes/categories"),
   getClass: (classId) => request(`/classes/${classId}`),
 
-   // passes
+  // Pass System Entitlements
   getPassPlans: () => request("/passes/plans"),
-  getMyPasses: () => request("/passes/my-passes"), // Fixed: removed trailing slash
+  getMyPasses: () => request("/passes/my-passes"), 
   purchasePass: (planKey) =>
     request("/passes/purchase", { method: "POST", body: JSON.stringify({ plan_key: planKey }) }),
 
-  // bookings
-  getMyBookings: () => request("/bookings"), // Fixed: removed trailing slash
+  // Booking Execution Matrix
+  getMyBookings: () => request("/bookings"), 
   createBooking: (classId) =>
     request("/bookings", { method: "POST", body: JSON.stringify({ class_id: classId }) }),
   cancelBooking: (bookingId) =>
@@ -61,4 +69,3 @@ const api = {
 };
 
 export default api;
-

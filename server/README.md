@@ -9,7 +9,8 @@ for serialization.
 ```
 backend/
 ├── main.py                 # app setup + every route
-├── extensions.py           # db, jwt, cors, migrate, ma
+├── extensions.py
+|- blueprints/
 ├── controllers/
 │   ├── user_controller.py
 │   ├── studio_controller.py

@@ -1,3 +1,5 @@
+from tkinter import N
+
 from extensions import db
 from models.user import User
 
@@ -9,11 +11,11 @@ class UserController:
     @classmethod
     def register_user(cls, data):
         user = User(
-            email=data["email"],
-            full_name=data["full_name"],
-            phone=data["phone"],
+            email=data.get("email"),
+            full_name=data.get("full_name"),
+            phone=data.get("phone", None),
         )
-        user.set_password(data["password"])
+        user.set_password(data.get("password"))
         db.session.add(user)
         db.session.commit()
         return user

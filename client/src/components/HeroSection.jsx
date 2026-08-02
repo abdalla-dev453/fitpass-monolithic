@@ -14,7 +14,7 @@ export default function HeroSection() {
     <section 
       className="relative overflow-hidden min-h-screen flex items-center select-none border-b-2 border-zinc-900 bg-gym-grid text-white"
       style={{
-        backgroundImage: `linear-gradient(to right, rgba(11, 12, 16, 0.98) 10%, rgba(11, 12, 16, 0.5) 75%), url(${gymBanner})`,
+        backgroundImage: `linear-gradient(to right, rgba(11, 12, 16, 0.98) 15%, rgba(11, 12, 16, 0.5) 75%), url(${gymBanner})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"

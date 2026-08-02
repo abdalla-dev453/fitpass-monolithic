@@ -13,6 +13,11 @@ class BookingSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         include_fk = True
 
+class CreateBookingSchema(ma.Schema):
+    """Input schema for POST /bookings - the client only sends the class_id ; user_id from the JWT , not the request body."""
+    class_id = fields.Integer(required=True)
+
 
 booking_schema = BookingSchema()
 bookings_schema = BookingSchema(many=True)
+create_booking_schema = CreateBookingSchema()

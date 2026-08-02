@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext.jsx";
 import { ArrowRight, ShieldAlert, KeyRound, Mail } from "lucide-react";
 
 export default function Login() {
-  const { login, showToast } = useApp();
+  // Destructure user to check if they are already logged in
+  const { login, user, showToast } = useApp();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Proactive redirection: If user is logged in, kick them out of login page
+  useEffect(() => {
+    if (user) {
+      navigate("/classes");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,9 +25,11 @@ export default function Login() {
     setError(null);
     try {
       await login(form);
-      navigate("/classes"); // Redirect directly to the dispatch map schedule view upon auth success
+      navigate("/classes"); 
     } catch (err) {
-      setError(err.message || "AUTHENTICATION PIPELINE CRASHED. VERIFY CREDENTIAL NODES.");
+      // Safely extract message from Flask response or fallback
+      const errorMsg = err.response?.data?.error || err.message || "AUTHENTICATION FAILED.";
+      setError(errorMsg.toUpperCase());
       showToast("LOGIN PHASE REJECTED.");
     } finally {
       setLoading(false);
@@ -35,11 +45,11 @@ export default function Login() {
         {/* HEADER BLOCK BRAND MARK */}
         <div className="text-center border-b-2 border-zinc-900 pb-6">
           <div className="inline-flex mb-3">
-            <span className="bg-zinc-900 border border-zinc-800 text-zinc-500 font-sans font-black tracking-widest text-[9px] uppercase px-3 py-1">
+            <span className="bg-zinc-900 border border-zinc-800 text-zinc-500 font-sans font-black tracking-widest text-[9px]  px-3 py-1">
               ATHLETE GATEWAY PORTAL
             </span>
           </div>
-          <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">
+          <h2 className="font-display font-black text-3xl  tracking-tighter text-white">
             ENGAGE YOUR <span className="text-[#CCFF00]">SESSION.</span>
           </h2>
         </div>
@@ -48,7 +58,7 @@ export default function Login() {
         {error && (
           <div className="mt-6 border border-red-900 bg-red-950/40 p-4 flex items-center gap-3">
             <ShieldAlert size={16} className="text-red-500 shrink-0" strokeWidth={2.5} />
-            <p className="text-[10px] font-black uppercase tracking-widest text-red-400 leading-normal">
+            <p className="text-[10px] font-black  tracking-widest text-red-400 leading-normal">
               {error}
             </p>
           </div>
@@ -59,7 +69,7 @@ export default function Login() {
           
           {/* EMAIL ALLOCATION FIELD */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">OPERATIONAL EMAIL IDENTIFIER</label>
+            <label className="text-[10px] font-black  tracking-widest text-zinc-500">OPERATIONAL EMAIL IDENTIFIER</label>
             <div className="relative border-2 border-zinc-800 bg-zinc-900 p-1 focus-within:border-[#CCFF00] transition-colors duration-100">
               <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" strokeWidth={2.5} />
               <input
@@ -67,16 +77,17 @@ export default function Login() {
                 required
                 disabled={loading}
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value.toUpperCase() })}
+                // FIXED: Removed .toUpperCase() to preserve casing integrity for database matching
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="ENTER REGISTERED EMAIL"
-                className="w-full bg-transparent pl-9 pr-3 py-2 text-xs font-black uppercase tracking-widest text-white placeholder:text-zinc-700 focus:outline-none"
+                className="w-full bg-transparent pl-9 pr-3 py-2 text-xs font-black  tracking-widest text-white placeholder:text-zinc-700 focus:outline-none"
               />
             </div>
           </div>
 
           {/* PASSWORD LOCK ALLOCATION FIELD */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">SECURITY CODE ENCRYPTION</label>
+            <label className="text-[10px] font-black  tracking-widest text-zinc-500">SECURITY CODE ENCRYPTION</label>
             <div className="relative border-2 border-zinc-800 bg-zinc-900 p-1 focus-within:border-[#CCFF00] transition-colors duration-100">
               <KeyRound size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" strokeWidth={2.5} />
               <input
@@ -86,7 +97,7 @@ export default function Login() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder="ENTER SECURE CODE"
-                className="w-full bg-transparent pl-9 pr-3 py-2 text-xs font-black uppercase tracking-widest text-white placeholder:text-zinc-700 focus:outline-none"
+                className="w-full bg-transparent pl-9 pr-3 py-2 text-xs font-black  tracking-widest text-white placeholder:text-zinc-700 focus:outline-none"
               />
             </div>
           </div>
@@ -106,12 +117,12 @@ export default function Login() {
 
         {/* REDIRECT ACCESS LINK MATRIX */}
         <div className="mt-8 pt-4 border-t border-zinc-900 text-center">
-          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+          <p className="text-[10px] font-black  tracking-widest text-zinc-500">
             NEW ATHLETE TO THE COMPREHENSIVE FEDERATION NETWORK?
           </p>
           <Link
             to="/register"
-            className="inline-block mt-2 text-xs font-black uppercase tracking-wider text-[#CCFF00] hover:text-white underline decoration-2 underline-offset-4"
+            className="inline-block mt-2 text-xs font-black  tracking-wider text-[#CCFF00] hover:text-white underline decoration-2 underline-offset-4"
           >
             INITIALIZE NEW ACCOUNT PASSPORT
           </Link>

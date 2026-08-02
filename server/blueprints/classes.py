@@ -5,7 +5,7 @@ from controllers.class_controller import ClassController
 from schemas.class_schema import class_schema, classes_schema
 from schemas.class_category_schema import categories_schema
 from blueprints.decorators import admin_required
-from server.models import fitness_class
+from models import fitness_class
 
 classes_bp = Blueprint("classes_bp", __name__)
 

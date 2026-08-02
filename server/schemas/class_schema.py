@@ -20,8 +20,8 @@ class FitnessClassSchema(ma.SQLAlchemyAutoSchema):
     capacity = fields.Integer(required=True, validate=validate.Range(min=1))
 
     def get_spots_remaining(self, obj):
-        booked = obj.bookings.count() if hasattr(obj.bookings, "count") else len(obj.b
-        return max(0, obj.capacity - booked))
+        booked = obj.bookings.count() if hasattr(obj.bookings, "count") else len(obj.bookings)
+        return max(0, obj.capacity - booked)
 
     @validates_schema
     def validate_times(self, data, **kwargs):

@@ -5,13 +5,6 @@ from marshmallow import ValidationError
 
 from extensions import db, jwt, cors, migrate, ma
 
-# Import blueprints
-from blueprints.auth import auth_bp
-from blueprints.studios import studios_bp
-from blueprints.classes import classes_bp
-from blueprints.passes import passes_bp
-from blueprints.bookings import bookings_bp
-
 # Import models so Flask-Migrate picks them up
 import models.user         
 import models.studio       
@@ -19,8 +12,16 @@ import models.trainer
 import models.class_category 
 import models.fitness_class   
 import models.pass_model   
-import models.booking     
+import models.booking  
 
+# Import blueprints
+from blueprints.auth import auth_bp
+from blueprints.studios import studios_bp
+from blueprints.classes import classes_bp
+from blueprints.passes import passes_bp
+from blueprints.bookings import bookings_bp
+
+   
 load_dotenv()
 
 
@@ -72,7 +73,7 @@ def create_app():
 
     return app
 
+app = create_app()
 
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True)

@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
-import api from "../lib/api"; // Added direct integration for your new endpoint mapping layers
+import api from "../lib/api"; 
 
-const AppContext = createContext(null);
+// Export the context directly so outside components can reference it if needed
+export const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Real Auth State Variables to support your new api.js changes
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,6 @@ export function AppProvider({ children }) {
     toastTimer.current = window.setTimeout(() => setToast(null), 3200);
   }, []);
 
-  // Fetch logged in user details instantly if an active token resides locally
   useEffect(() => {
     async function checkAuth() {
       const token = localStorage.getItem("fitpass_token");
@@ -31,19 +30,19 @@ export function AppProvider({ children }) {
         return;
       }
       try {
-        const userData = await api.getMe();
-        setUser(userData);
+        const data = await api.getMe();
+        // Match the Flask response structure mapping: {"user": {...}}
+        setUser(data.user || data); 
       } catch (err) {
         console.error("Auth initialization failed:", err);
-        localStorage.removeItem("fitpass_token"); // Sweep bad/expired tokens out cleanly
+        localStorage.removeItem("fitpass_token"); 
       } finally {
-        setLoading(false);
+        setLoading(false); 
       }
     }
     checkAuth();
   }, []);
 
-  // Interactive purchase execution linked directly to your new api setup
   const purchasePlan = useCallback(
     async (plan) => {
       try {
@@ -57,12 +56,33 @@ export function AppProvider({ children }) {
     [showToast]
   );
 
-  // Authentication utility wrapper methods
   const login = useCallback(async (credentials) => {
     const data = await api.login(credentials);
     localStorage.setItem("fitpass_token", data.access_token);
     setUser(data.user);
     showToast("Welcome back!");
+    return data;
+  }, [showToast]);
+
+  //REPAIRED & SANITIZED REGISTER PIPELINE
+  const register = useCallback(async (signupData) => {
+    // 🛠️ Sanitize payload data to perfectly fit Flask Marshmallow constraints
+    const sanitizedPayload = {
+      full_name: signupData.full_name?.trim(),
+      email: signupData.email?.trim().toLowerCase(), // Enforce absolute lowercase
+      password: signupData.password, // Keep exact password matching
+    };
+
+    // Only attach phone if the user actually typed something into it
+    if (signupData.phone && signupData.phone.trim() !== "") {
+      sanitizedPayload.phone = signupData.phone.trim();
+    }
+
+    // Dispatch clean payload data to api gateway file
+    const data = await api.register(sanitizedPayload); 
+    localStorage.setItem("fitpass_token", data.access_token);
+    setUser(data.user);
+    showToast("Account created successfully!");
     return data;
   }, [showToast]);
 
@@ -77,6 +97,7 @@ export function AppProvider({ children }) {
     user,
     loading,
     login,
+    register, 
     logout,
     mobileMenuOpen,
     setMobileMenuOpen,
@@ -90,9 +111,8 @@ export function AppProvider({ children }) {
     showToast,
   };
 
-  // Prevent app rendering freezes while initial token tracking finishes processing
   if (loading) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Loading...</div>;
+    return <div className="min-h-screen bg-[#0B0C10] flex items-center justify-center text-zinc-500 font-sans tracking-widest text-xs">LOADING SYSTEM METRICS...</div>;
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

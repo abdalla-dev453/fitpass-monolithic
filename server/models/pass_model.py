@@ -4,11 +4,6 @@ from extensions import db
 
 class Pass(db.Model):
     """A purchased credit pass owned by a user.
-
-    The old project split this into two tables: a MembershipPass "catalog"
-    of plan options, and a PurchasedPass row per purchase. Since the catalog
-    never changed per-request, the plan options now live as constants in
-    PassController and each purchase just snapshots the plan's details here.
     """
     __tablename__ = "passes"
 

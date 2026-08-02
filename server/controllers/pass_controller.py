@@ -2,9 +2,6 @@ from datetime import datetime, timedelta, timezone
 from extensions import db
 from models.pass_model import Pass
 
-# The old MembershipPass "catalog" table never changed per-request, so its
-# options now live here as plain constants. Each purchase snapshots one of
-# these plans into a new Pass row.
 PASS_PLANS = {
     "drop-in": {"name": "Single Class Drop-In", "credits": 1, "price": 25.00, "duration_days": 30},
     "10-pack": {"name": "10-Class Flex Pass", "credits": 10, "price": 180.00, "duration_days": 90},

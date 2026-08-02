@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token,jwt_required, get_jwt_identity
-from contollers.user_controller import UserController
+from controllers.user_controller import UserController
 from schemas.user_schema import user_schema, register_schema, login_schema
 from marshmallow import ValidationError
 
@@ -19,7 +19,9 @@ def register():
         return jsonify({"error": "Email already taken"}), 400
 
     user = UserController.register_user(data)
-    token = create_access_token(identity=str(user.id)), additionl_claims={"role": user.role}
+    token = create_access_token(
+        identity=str(user.id), 
+        additional_claims={"role": user.role})
     return jsonify({
         "message": "User registered successfully",
         "access_token": token,
@@ -40,7 +42,9 @@ def login():
     if not user:
         return jsonify({"error": "Invalid email or password"}), 401
 
-    token = create_access_token(identity=str(user.id)), additionl_claims={"role": user.role}
+    token = create_access_token(
+        identity=str(user.id), 
+        additional_claims={"role": user.role})
     return jsonify({
         "message": "User logged in successfully",
         "access_token": token,

@@ -1,204 +1,198 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
-import { Activity, Menu, X, User, LogOut, LogIn, UserPlus } from "lucide-react";
+import React from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../context/AppContext.jsx";
-
-const LINKS = [
-  { label: "CLASSES", to: "/classes" },
-  { label: "STUDIOS", to: "/studios" },
-  { label: "PRICING PLANS", to: "/pricing" },
-  { label: "ABOUT US", to: "/about" },
-];
+import { Menu, X, LogOut, User as UserIcon, ShieldAlert } from "lucide-react";
 
 export default function Navbar() {
-  const { mobileMenuOpen, setMobileMenuOpen, user, logout } = useApp();
-  const [scrolled, setScrolled] = useState(false);
+  const { user, logout, mobileMenuOpen, setMobileMenuOpen } = useApp();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const handleLogout = () => {
+    logout();
+    setMobileMenuOpen(false);
+    navigate("/");
+  };
 
-  const handleNavClick = () => setMobileMenuOpen(false);
+  // Base navigation schema with visibility parameters mapped to clearance levels
+  const navLinks = [
+    { path: "/", label: "HOME", visible: true },
+    { path: "/about", label: "ABOUT", visible: true },
+    { path: "/pricing", label: "PRICING", visible: true },
+    
+    // Protected Routes - require login, open to everyone logged in
+    { path: "/studios", label: "STUDIOS", visible: !!user },
+    
+    // Trainer or Admin clearance flags
+    { 
+      path: "/classes", 
+      label: "CLASSES COMMAND", 
+      visible: user && ["trainer", "admin"].includes(user.role) 
+    },
+    
+    // Strict admin override route placeholder
+    { 
+      path: "/admin-dashboard", 
+      label: "CORE CONTROL", 
+      visible: user && user.role === "admin" 
+    },
+  ];
+
+  // Filtering out active links for current compilation matching state
+  const visibleLinks = navLinks.filter(link => link.visible);
 
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-150 select-none ${
-        scrolled
-          ? "bg-[#0B0C10] border-b-2 border-zinc-800 shadow-[0_4px_20px_rgba(0,0,0,0.8)]"
-          : "bg-gradient-to-b from-black/80 to-transparent border-b-2 border-transparent"
-      }`}
-    >
-      {/* 
-        LAYOUT CHANGE: Changed px-6 lg:px-8 to pl-6 lg:pl-8 pr-0 
-        This allows the slanted background to touch the right edge of the browser screen perfectly.
-      */}
-      <nav className="max-w-7xl mx-auto pl-6 lg:pl-8 pr-0 flex items-center justify-between h-16 md:h-20 relative">
-        {/* HARD ATHLETIC BRAND LOGO BLOCK */}
-        <Link to="/" className="flex items-center gap-2 group tracking-tighter z-10">
-          <span className="flex h-8 w-8 items-center justify-center bg-[#CCFF00] text-black font-black transition-transform duration-100 group-hover:scale-105">
-            <Activity size={18} strokeWidth={3} />
-          </span>
-          <span className="font-display font-black text-2xl uppercase tracking-tight text-white">
-            FIT<span className="text-[#CCFF00]">PASS</span>
-          </span>
+    <nav className="fixed top-0 left-0 w-full z-50 bg-zinc-950/90 backdrop-blur-md border-b-2 border-zinc-900 px-4 md:px-8 py-4 select-none">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        
+        {/* BRAND IDENTITY NODE */}
+        <Link 
+          to="/" 
+          className="font-display font-black text-2xl uppercase tracking-tighter text-white hover:opacity-90"
+        >
+          FIT<span className="text-[#CCFF00]">PASS.</span>
         </Link>
 
-        {/* 
-          LAYOUT CHANGE: Centered the link container to match the image.
-          Using absolute positioning locks it perfectly to the middle of the viewport.
-        */}
-        <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
-          <div className="flex items-center gap-8 h-full pointer-events-auto">
-            {LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `text-xs font-black uppercase tracking-widest relative h-full flex items-center border-b-2 transition-all duration-150 ${
-                    isActive
-                      ? "text-[#CCFF00] border-[#CCFF00]"
-                      : "text-zinc-400 border-transparent hover:text-white hover:border-zinc-700"
-                  }`
-                }
+        {/* DESKTOP MATRIX ROUTE NAVIGATOR */}
+        <div className="hidden md:flex items-center gap-6">
+          {visibleLinks.map((link) => {
+            const isActive = location.pathname === link.path;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-100 ${
+                  isActive ? "text-[#CCFF00]" : "text-zinc-400 hover:text-white"
+                }`}
               >
                 {link.label}
-              </NavLink>
-            ))}
-          </div>
+              </Link>
+            );
+          })}
         </div>
 
-        {/* 
-          LAYOUT CHANGE: Added the slanted login block container.
-          This houses the background shape and pads the original login controls inside it.
-        */}
-        <div className="hidden md:flex items-center h-full relative z-10">
-          {/* The Slanted Shape (Skewed background block matching the layout style) */}
-          <div 
-            className="absolute inset-y-0 -left-6 w-[calc(100%+24px)] bg-[#a81414] -skew-x-[20deg] origin-top-right border-l-4 border-red-600"
-            style={{ content: '""' }}
-          />
-          
-          {/* USER EXPERIENCE ACTION TERMINAL (Kept exactly your controls & colors) */}
-          <div className="relative flex items-center gap-4 h-full px-8 pr-12">
-            {user ? (
-              <div className="flex items-center gap-4">
-                {/* Profile Overview Pill Block */}
-                <div className="flex items-center gap-2 border border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded-none">
-                  <User size={14} className="text-[#CCFF00]" />
-                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-300">
-                    {user.name || "ATHLETE"}
-                  </span>
-                </div>
-                {/* Direct Tactical Logout Switch */}
-                <button
-                  onClick={logout}
-                  className="h-8 w-8 border border-zinc-800 text-zinc-600 hover:text-red-500 hover:border-red-900 flex items-center justify-center transition-colors"
-                  title="LOGOUT SESSION"
-                >
-                  <LogOut size={14} />
-                </button>
-              </div>
-            ) : (
-              /* HIGH-CONTRAST DUAL GATEWAY CONTROLS */
-              <div className="flex items-center gap-3">
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-colors py-2 px-3"
-                >
-                  <LogIn size={13} strokeWidth={2.5} className="text-[#CCFF00]" />
-                  LOGIN
-                </Link>
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center bg-[#CCFF00] text-black font-display font-black text-xs uppercase tracking-widest px-5 py-2 border-2 border-[#CCFF00] hover:bg-transparent hover:text-[#CCFF00] transition-colors"
-                >
-                  REGISTER
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* GEOMETRIC MOBILE ACTION BUTTON */}
-        <div className="md:hidden flex items-center pr-6 z-10">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex items-center justify-center h-10 w-10 border border-zinc-800 bg-zinc-950 text-white rounded-none hover:border-[#CCFF00] transition-colors"
-            aria-label={mobileMenuOpen ? "CLOSE MENU" : "OPEN MENU"}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? (
-              <X size={20} strokeWidth={2.5} />
-            ) : (
-              <Menu size={20} strokeWidth={2.5} />
-            )}
-          </button>
-        </div>
-      </nav>
-
-      {/* SOLID PERFORMANCE MOBILE PANEL SLIDE DROPDOWN */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-200 ease-out border-zinc-800 bg-[#0B0C10] ${
-          mobileMenuOpen ? "max-h-[480px] border-b-2" : "max-h-0"
-        }`}
-      >
-        <div className="px-6 pb-8 pt-4 flex flex-col gap-1.5">
-          {LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              onClick={handleNavClick}
-              className={({ isActive }) =>
-                `py-3 text-sm font-black uppercase tracking-widest border-b border-zinc-900 last:border-0 ${
-                  isActive ? "text-[#CCFF00]" : "text-zinc-400 hover:text-white"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-
-          {/* Mobile Profile Display / Gateway Switcher */}
+        {/* IDENTITY AND SESSION OPERATIONS CORNER */}
+        <div className="hidden md:flex items-center gap-4">
           {user ? (
-            <div className="mt-4 pt-4 border-t-2 border-zinc-900 flex items-center justify-between">
-              <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">
-                ACTIVE ATHLETE:{" "}
-                <span className="text-white ml-1">{user.name}</span>
-              </span>
-              <button
-                onClick={() => {
-                  handleNavClick();
-                  logout();
-                }}
-                className="text-xs font-black uppercase text-red-500 tracking-wider hover:underline"
+            <div className="flex items-center gap-4">
+              {/* CLEARANCE VISUAL ANCHOR CHIP */}
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-black text-white uppercase tracking-wider">{user.name}</span>
+                <span className="text-[7px] font-black bg-zinc-900 border border-zinc-800 text-[#CCFF00] px-1.5 py-0.5 rounded-none tracking-widest uppercase">
+                  {user.role === "user" ? "ATHLETE" : user.role}
+                </span>
+              </div>
+              
+              <Link 
+                to="/profile" 
+                className="p-2 border-2 border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-[#CCFF00] hover:border-[#CCFF00] transition-colors"
               >
-                LOGOUT
+                <UserIcon size={14} strokeWidth={2.5} />
+              </Link>
+              
+              <button
+                onClick={handleLogout}
+                className="p-2 border-2 border-red-900/30 bg-red-950/20 text-red-400 hover:bg-red-950/50 hover:border-red-500 transition-colors"
+              >
+                <LogOut size={14} strokeWidth={2.5} />
               </button>
             </div>
           ) : (
-            <div className="mt-6 pt-4 border-t-2 border-zinc-900 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                onClick={handleNavClick}
-                className="flex items-center justify-center gap-2 font-display font-black text-xs uppercase tracking-widest py-3 border-2 border-zinc-800 text-white bg-zinc-950 hover:border-white transition-colors"
+                className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white px-3 py-1.5"
               >
-                <LogIn size={14} strokeWidth={2.5} className="text-[#CCFF00]" />
-                LOGIN ACCOUNT
+                ACCESS SESSION
               </Link>
               <Link
                 to="/register"
-                onClick={handleNavClick}
-                className="flex items-center justify-center gap-2 font-display font-black text-xs uppercase tracking-widest py-3 bg-[#CCFF00] text-black border-2 border-[#CCFF00]"
+                className="text-[10px] font-black uppercase tracking-widest bg-[#CCFF00] text-black hover:bg-white px-4 py-2 border border-transparent shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none transition-all duration-150"
               >
-                <UserPlus size={14} strokeWidth={2.5} />
-                REGISTER NEW PASS
+                FORGE PASSPORT
               </Link>
             </div>
           )}
         </div>
+
+        {/* RESPONSIVE RESPONDER MOBILE MENU TOGGLE */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-1.5 border-2 border-zinc-800 text-zinc-400 hover:text-white"
+        >
+          {mobileMenuOpen ? <X size={16} strokeWidth={2.5} /> : <Menu size={16} strokeWidth={2.5} />}
+        </button>
+
       </div>
-    </header>
+
+      {/* MOBILE EXPANDED MENU DRAWER DISPATCH OVERLAY */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-[calc(100%+2px)] left-0 w-full bg-zinc-950 border-b-2 border-zinc-900 p-6 space-y-6 flex flex-col animate-in slide-in-from-top-4 duration-150">
+          
+          <div className="flex flex-col gap-4">
+            {visibleLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`text-xs font-black uppercase tracking-widest py-1 ${
+                    isActive ? "text-[#CCFF00]" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* INTERNAL ACCOUNT CONSOLE DRAWER ASSIGNMENT */}
+          <div className="pt-4 border-t border-zinc-900 flex flex-col gap-3">
+            {user ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between bg-zinc-900/60 p-3 border border-zinc-800">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black uppercase text-white">{user.name}</span>
+                    <span className="text-[8px] font-black tracking-widest text-zinc-500 uppercase mt-0.5">{user.role} INTERFACE ACTIVE</span>
+                  </div>
+                  <Link 
+                    to="/profile" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-[10px] font-black uppercase text-[#CCFF00] underline"
+                  >
+                    PROFILE
+                  </Link>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 border-2 border-red-950 bg-red-950/20 text-red-400 py-2.5 text-[10px] font-black uppercase tracking-widest"
+                >
+                  <LogOut size={12} strokeWidth={2.5} /> TERMINATE SECTOR AUTHORIZATION
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center border-2 border-zinc-800 text-zinc-400 font-black uppercase tracking-widest py-2.5 text-[10px]"
+                >
+                  ACCESS GATEWAY
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center bg-[#CCFF00] text-black font-black uppercase tracking-widest py-2.5 text-[10px]"
+                >
+                  INITIALIZE NEW ACCOUNT PASSPORT
+                </Link>
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+    </nav>
   );
 }
