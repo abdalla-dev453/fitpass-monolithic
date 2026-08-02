@@ -38,10 +38,12 @@ def create_app():
     migrate.init_app(app, db)
     ma.init_app(app)
 
-    # CORS Setup (Fixed: Whitelisted your exact Vercel frontend URL in the fallback string)
+    # CORS origins must match the browser's Origin header exactly.  Keep the
+    # deployed frontend URL in the default for a usable first deployment, and
+    # configure CORS_ORIGINS in the hosting provider for other environments.
     allowed_origins = os.getenv(
-        "CORS_ORIGINS", 
-        "http://localhost:5173,http://127.0.0.1:5173,https://vercel.app"
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,https://fitpass-monolithic-t8u7.vercel.app",
     ).split(",")
     allowed_origins = [origin.strip() for origin in allowed_origins if origin.strip()]
     cors.init_app(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
@@ -70,16 +72,6 @@ def create_app():
     @app.route("/healthcheck")
     def healthcheck():
         return jsonify({"status": "online", "message": "FitPass API is active"}), 200
-
-    # Force inject CORS headers to override extension and redirect issues
-    @app.after_request
-    def add_cors_headers(response):
-        # Fixed: Explicitly match your exact production deployment URL
-        response.headers["Access-Control-Allow-Origin"] = "https://vercel.app"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        return response
 
     return app
 
