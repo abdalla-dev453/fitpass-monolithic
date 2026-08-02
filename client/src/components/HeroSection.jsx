@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Play, MapPin, Users, Star, CreditCard } from "lucide-react";
-import gymBanner from "../assets/class.jpeg";
+import gymBanner from "../assets/hero_banner.jpeg";
 
 const STATS = [
   { label: "PARTNER BOXES", value: "50+" },
@@ -14,7 +14,7 @@ export default function HeroSection() {
     <section 
       className="relative overflow-hidden min-h-screen flex items-center select-none border-b-2 border-zinc-900 bg-gym-grid text-white"
       style={{
-        backgroundImage: `linear-gradient(to right, rgba(11, 12, 16, 0.98) 15%, rgba(11, 12, 16, 0.5) 75%), url(${gymBanner})`,
+        backgroundImage: `linear-gradient(to right, rgba(11, 12, 16, 0.98) 5%, rgba(11, 12, 16, 0.5) 75%), url(${gymBanner})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"

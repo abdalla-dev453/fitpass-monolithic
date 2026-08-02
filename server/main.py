@@ -42,7 +42,7 @@ def create_app():
 
     # CORS Setup
     allowed_origins = os.getenv(
-        "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+        "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173, http://vercel.app"
     ).split(",")
     allowed_origins = [origin.strip() for origin in allowed_origins if origin.strip()]
     cors.init_app(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
