@@ -94,13 +94,29 @@ if unset — see `client/src/lib/api.js`).
 | `SECRET_KEY` | Flask session/signing secret | `fallback-secret` (change in prod) |
 | `JWT_SECRET_KEY` | Signs JWT access tokens | `fallback-jwt-secret` (change in prod) |
 | `DATABASE_URI` | SQLAlchemy connection string | `sqlite:///fitpass.db` |
-| `CORS_ORIGINS` | Comma-separated list of allowed frontend origins | `http://localhost:5173,http://127.0.0.1:5173` |
+| `CORS_ORIGINS` | Comma-separated list of allowed frontend origins (must be the full Vercel URL, not `https://vercel.app`) | `http://localhost:5173,http://127.0.0.1:5173,https://fitpass-monolithic-t8u7.vercel.app` |
 
 `client/.env` (optional):
 
 | Variable | Purpose | Default if unset |
 |---|---|---|
 | `VITE_API_URL` | Base URL the SPA sends requests to | `http://127.0.0.1:5000` |
+
+### Render deployment
+
+Create a Render Postgres database and set the backend service's `DATABASE_URI`
+to its **internal connection URL**. This repository includes `psycopg`, the
+PostgreSQL driver required by SQLAlchemy.
+
+Set the backend service's Root Directory to `server` and Start Command to:
+
+```bash
+flask --app main db upgrade && gunicorn main:app
+```
+
+The migration command is idempotent, so it creates or upgrades the schema on
+each deploy before Gunicorn starts. Do not rely on the default SQLite database
+on Render: its filesystem is ephemeral and data can disappear after a restart.
 
 ---
 
@@ -151,26 +167,18 @@ There is no separate `Role` table — it's a plain string column, checked via a
 These were found during a debugging pass and are worth tracking as follow-up tickets
 — they don't block register/login/browsing, but will 500 if exercised:
 
-- **`passes` and `bookings` controllers vs. blueprints are out of sync.** The blueprint
-  route handlers call controller methods that don't exist under those names/signatures
-  (e.g. `PassController.get_passes_by_user_id` vs. the controller's actual
-  `get_user_passes`; `BookingController.cancel_booking(user_id, booking_id)` vs. the
-  controller's `cancel_booking(booking)`). Purchasing a pass and booking/cancelling a
-  class will currently error until these are reconciled.
 - **No `/trainers` endpoint exists yet.** `TrainerController` only has read helpers and
   isn't wired to a blueprint — there's no way to fetch or manage trainer profiles over
-  the API yet, even though `Trainer` rows are created on trainer signup.
+  the API yet.
 - **`AppProvider` is mounted twice** (once in `main.jsx`, once inside `App.jsx`),
   so the auth-check (`/auth/me`) fires twice on page load. Harmless but wasteful —
   worth collapsing to a single provider.
-- **Public self-registration allows `role: "admin"`.** Fine for a school project /
-  demo, but before this goes near real users, gate admin creation behind an existing
-  admin or a seed script instead of a public form field.
+- **Public self-registration always creates a `client` account.** This is intentional:
+  trainer and admin accounts must be provisioned through trusted back-office workflows.
 
 ## Recently fixed (see git history / debug report)
 
 - App previously failed to boot entirely (`bcrypt` misuse in `models/user.py`, a stray
   `tkinter` import in `user_controller.py`).
-- Registration silently ignored the submitted `role` — every signup became a
-  `"client"` regardless of what was selected. Role is now persisted end-to-end, and a
-  linked `Trainer` row is auto-created when someone registers as a trainer.
+- Registration now deliberately ignores any submitted role and creates a `"client"`
+  account, preventing public signups from granting privileged access.

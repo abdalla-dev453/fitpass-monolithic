@@ -15,7 +15,7 @@ def get_my_bookings():
     user_bookings = BookingController.get_user_bookings(user_id)
     return jsonify(bookings_schema.dump(user_bookings)), 200
 
-@bookings_bp.route("", methods=["POST"])
+@bookings_bp.route("/", methods=["POST"])
 @jwt_required()
 def create_booking():
     json_data = request.get_json(silent=True)

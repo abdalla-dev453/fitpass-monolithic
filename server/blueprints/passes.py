@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
 
 from controllers.pass_controller import PassController
-from schemas.pass_schema import passes_schema, purchase_pass_schema
+from schemas.pass_schema import pass_schema, passes_schema, purchase_pass_schema
 
 passes_bp = Blueprint("passes_bp", __name__)
 
