@@ -1,7 +1,6 @@
-from tkinter import N
-
 from extensions import db
 from models.user import User
+from models.trainer import Trainer
 
 class UserController:
     @classmethod
@@ -10,13 +9,23 @@ class UserController:
 
     @classmethod
     def register_user(cls, data):
+        role = data.get("role") or "client"
+
         user = User(
             email=data.get("email"),
             full_name=data.get("full_name"),
             phone=data.get("phone", None),
+            role=role,
         )
         user.set_password(data.get("password"))
         db.session.add(user)
+        db.session.flush()  # get user.id before commit for the Trainer FK below
+
+        # A trainer needs a linked Trainer row so trainer-only features
+        # (class assignment, trainer profile lookups) don't 404/500 later.
+        if role == "trainer":
+            db.session.add(Trainer(user_id=user.id))
+
         db.session.commit()
         return user
 

@@ -12,7 +12,7 @@ export default function Register() {
     email: "", 
     password: "", 
     phone: "",
-    role: "user" // Default fallback role selection
+    role: "client" // Default fallback role selection (must match backend: client/trainer/admin)
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -43,7 +43,7 @@ export default function Register() {
 
   // Role Configuration Map for UI styling
   const roles = [
-    { key: "user", label: "ATHLETE", icon: User, desc: "Standard access node" },
+    { key: "client", label: "ATHLETE", icon: User, desc: "Standard access node" },
     { key: "trainer", label: "TRAINER", icon: Dumbbell, desc: "Command instruction modules" },
     { key: "admin", label: "ADMIN", icon: ShieldCheck, desc: "Root infrastructure override" }
   ];

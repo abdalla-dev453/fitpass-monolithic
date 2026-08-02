@@ -1,7 +1,6 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
-import bcrypt
 
 
 class User(db.Model):
@@ -29,10 +28,10 @@ class User(db.Model):
 
     # functions for setting and checking password
     def set_password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password)
+        self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f"<User id={self.id} email={self.email} role={self.role}>"

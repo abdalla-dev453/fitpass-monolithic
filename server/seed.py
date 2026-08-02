@@ -16,7 +16,7 @@ def seed_database():
         print("Starting database seed...")
         db.create_all()
 
-        print("Cleaning old records...")
+        print("Wiping all existing database records...")
         Booking.query.delete()
         Pass.query.delete()
         FitnessClass.query.delete()
@@ -26,123 +26,165 @@ def seed_database():
         User.query.delete()
         db.session.commit()
 
-        print("Seeding users...")
-        admin = User(email="admin@fitpass.com", full_name="System Admin", role="admin", waiver_signed=True)
+        print("Seeding targeted users...")
+        # 1. Admin Account
+        admin = User(
+            email="mse@gmail.com", 
+            full_name="Msema Abdalla", 
+            role="admin", 
+            waiver_signed=True
+        )
         admin.set_password("AdminPass123!")
-        db.session.add(admin)
-
-        trainer_user1 = User(email="maya@fitpass.com", full_name="Maya Lin", role="trainer", waiver_signed=True)
-        trainer_user1.set_password("TrainerPass123!")
-        trainer_user2 = User(email="alex@fitpass.com", full_name="Alex Rivera", role="trainer", waiver_signed=True)
-        trainer_user2.set_password("TrainerPass123!")
-        db.session.add_all([trainer_user1, trainer_user2])
+        
+        # 2. Trainer Account
+        trainer_user = User(
+            email="collo@gmail.com", 
+            full_name="Collo", 
+            role="trainer", 
+            waiver_signed=True
+        )
+        trainer_user.set_password("TrainerPass123!")
+        
+        # 3. Client Account
+        client_user = User(
+            email="naim@gmail.com", 
+            full_name="Naim", 
+            role="client", 
+            waiver_signed=True
+        )
+        client_user.set_password("ClientPass123!")
+        
+        db.session.add_all([admin, trainer_user, client_user])
         db.session.flush()
 
-        trainer1 = Trainer(
-            user_id=trainer_user1.id,
-            bio="10+ years teaching Vinyasa and Power Yoga with focus on alignment.",
-            specialties="Vinyasa, Pilates Core",
+        # Profile extension details for Collo the Trainer
+        trainer_profile = Trainer(
+            user_id=trainer_user.id,
+            bio="Elite fitness coach specializing in advanced strength conditioning, HIIT transformations, and athletic mobility.",
+            specialties="HIIT, Powerlifting, Calisthenics, Boxing Conditioning",
         )
-        trainer2 = Trainer(
-            user_id=trainer_user2.id,
-            bio="Former competitive athlete specializing in high-intensity conditioning.",
-            specialties="HIIT, Strength, Boxing",
-        )
-        db.session.add_all([trainer1, trainer2])
-
-        client1 = User(
-            email="sarah@example.com", full_name="Sarah Connor", phone="555-0199",
-            waiver_signed=True,
-        )
-        client1.set_password("ClientPass123!")
-        client2 = User(
-            email="david@example.com", full_name="David Miller", phone="555-0198",
-            waiver_signed=False,  # unsigned waiver to test route protection
-        )
-        client2.set_password("ClientPass123!")
-        db.session.add_all([client1, client2])
+        db.session.add(trainer_profile)
         db.session.flush()
 
-        print("Seeding studios...")
-        studio1 = Studio(
-            name="Zen Flow Loft",
-            location="123 Main St, Downtown",
-            description="A calm, sunlit space built for yoga, meditation, and low-impact movement.",
+        print("Seeding diverse fitness venues...")
+        studio_downtown = Studio(
+            name="Iron Pulse Lab (Downtown)",
+            location="789 Innovation Way, Suite A",
+            description="Premium high-energy facility equipped with modern turf yards, power racks, kettlebells, and heavy combat bags.",
         )
-        studio2 = Studio(
-            name="Iron Pulse Lab",
-            location="456 Market Ave, Westside",
-            description="High-energy facility packed with turf, kettlebells, and heavy bags.",
+        studio_uptown = Studio(
+            name="Zen & Core Oasis (Uptown)",
+            location="432 Serenity Boulevard",
+            description="Sunlit boutique space engineered for targeted deep-core work, group athletic conditioning, and recovery flows.",
         )
-        db.session.add_all([studio1, studio2])
+        db.session.add_all([studio_downtown, studio_uptown])
+        db.session.flush()
 
         print("Seeding class categories...")
-        cat_yoga = ClassCategory(name="Yoga")
         cat_hiit = ClassCategory(name="HIIT")
-        cat_pilates = ClassCategory(name="Pilates")
-        db.session.add_all([cat_yoga, cat_hiit, cat_pilates])
+        cat_strength = ClassCategory(name="Strength & Conditioning")
+        cat_boxing = ClassCategory(name="Boxing")
+        db.session.add_all([cat_hiit, cat_strength, cat_boxing])
         db.session.flush()
 
-        print("Seeding fitness classes...")
+        print("Seeding rich schedule matrix for Collo's classes...")
         now = datetime.now(timezone.utc)
-        class1 = FitnessClass(
-            title="Sunrise Vinyasa",
-            description="Start your day with dynamic flows and breathwork suitable for all levels.",
-            capacity=15,
+        
+        # Class 1: Active upcoming class tomorrow
+        class_upcoming_1 = FitnessClass(
+            title="Next-Level HIIT Burn",
+            description="Ignite your cardiovascular conditioning with explosive interval tracking designed to maximize raw power output.",
+            capacity=20,
             start_time=now + timedelta(days=1, hours=2),
             end_time=now + timedelta(days=1, hours=3),
-            studio_id=studio1.id,
-            trainer_id=trainer1.id,
-            category_id=cat_yoga.id,
-        )
-        class2 = FitnessClass(
-            title="Full-Body Burn HIIT",
-            description="Heart-pumping interval training using kettlebells, rowers, and bodyweight movements.",
-            capacity=10,
-            start_time=now + timedelta(days=2, hours=4),
-            end_time=now + timedelta(days=2, hours=5),
-            studio_id=studio2.id,
-            trainer_id=trainer2.id,
+            studio_id=studio_downtown.id,
+            trainer_id=trainer_profile.id,
             category_id=cat_hiit.id,
         )
-        class3 = FitnessClass(
-            title="Core & Reformer Pilates",
-            description="Targeted deep-core work to improve posture, balance, and stability.",
-            capacity=8,
-            start_time=now - timedelta(days=2, hours=3),  # past class, for review-flow testing
-            end_time=now - timedelta(days=2, hours=2),
-            studio_id=studio1.id,
-            trainer_id=trainer1.id,
-            category_id=cat_pilates.id,
+        
+        # Class 2: Active upcoming class in two days
+        class_upcoming_2 = FitnessClass(
+            title="Heavy Iron Barbell Strength",
+            description="Focus on fundamental compound lifting mechanics including compound deadlifts, squats, and functional presses.",
+            capacity=12,
+            start_time=now + timedelta(days=2, hours=4),
+            end_time=now + timedelta(days=2, hours=5),
+            studio_id=studio_downtown.id,
+            trainer_id=trainer_profile.id,
+            category_id=cat_strength.id,
         )
-        db.session.add_all([class1, class2, class3])
+        
+        # Class 3: Past class for testing historic review/attendance view
+        class_past_1 = FitnessClass(
+            title="Championship Boxing Conditioning",
+            description="High-octane shadow boxing combinations, heavy bag circuits, and fundamental core stability drills.",
+            capacity=15,
+            start_time=now - timedelta(days=3, hours=2),
+            end_time=now - timedelta(days=3, hours=1),
+            studio_id=studio_uptown.id,
+            trainer_id=trainer_profile.id,
+            category_id=cat_boxing.id,
+        )
+        
+        # Class 4: Additional past class for deep history data
+        class_past_2 = FitnessClass(
+            title="Explosive Calisthenics Core",
+            description="Master your own bodyweight with progressive gymnastic adjustments, pull configurations, and stability flows.",
+            capacity=10,
+            start_time=now - timedelta(days=6, hours=5),
+            end_time=now - timedelta(days=6, hours=4),
+            studio_id=studio_uptown.id,
+            trainer_id=trainer_profile.id,
+            category_id=cat_hiit.id,
+        )
+        
+        db.session.add_all([class_upcoming_1, class_upcoming_2, class_past_1, class_past_2])
         db.session.flush()
 
-        print("Seeding a purchased pass...")
-        user_pass1 = Pass(
-            user_id=client1.id,
-            plan_name="10-Class Flex Pass",
-            credits=10,
-            remaining_credits=8,
-            price=180.00,
-            purchased_at=now - timedelta(days=10),
-            expires_at=now + timedelta(days=80),
+        print("Seeding active fitness passes for Naim...")
+        naim_pass = Pass(
+            user_id=client_user.id,
+            plan_name="All-Access Elite 20-Class Pass",
+            credits=20,
+            remaining_credits=16,
+            price=320.00,
+            purchased_at=now - timedelta(days=7),
+            expires_at=now + timedelta(days=83),
         )
-        db.session.add(user_pass1)
+        db.session.add(naim_pass)
 
-        print("Seeding bookings...")
-        booking_upcoming = Booking(
-            user_id=client1.id, class_id=class1.id, booked_at=now - timedelta(days=1),
+        print("Seeding historic and upcoming bookings for Naim...")
+        # Booking 1: Naim booked into the upcoming HIIT class tomorrow
+        booking_future = Booking(
+            user_id=client_user.id, 
+            class_id=class_upcoming_1.id, 
+            booked_at=now - timedelta(days=1),
         )
-        booking_past = Booking(
-            user_id=client1.id, class_id=class3.id, booked_at=now - timedelta(days=5),
-            attended=True, rating=5,
-            review_text="Maya is an incredible instructor! Great cueing and music.",
+        
+        # Booking 2: Naim attended the Boxing class and left a review
+        booking_historic_1 = Booking(
+            user_id=client_user.id, 
+            class_id=class_past_1.id, 
+            booked_at=now - timedelta(days=5),
+            attended=True, 
+            rating=5,
+            review_text="Collo brings unmatched energy to the floor! The heavy bag structure was absolutely brutal and satisfying.",
         )
-        db.session.add_all([booking_upcoming, booking_past])
+
+        # Booking 3: Naim attended the Calisthenics class
+        booking_historic_2 = Booking(
+            user_id=client_user.id, 
+            class_id=class_past_2.id, 
+            booked_at=now - timedelta(days=7),
+            attended=True, 
+            rating=4,
+            review_text="Great progression scales provided for advanced movements. My posture felt awesome afterwards.",
+        )
+        
+        db.session.add_all([booking_future, booking_historic_1, booking_historic_2])
 
         db.session.commit()
-        print("Database seeded successfully!")
+        print("Database seeded with isolated target test data successfully!")
 
 
 if __name__ == "__main__":
