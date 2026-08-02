@@ -3,6 +3,7 @@ import { useApp } from "../context/AppContext.jsx";
 import api from "../lib/api";
 import { User, Activity, Calendar, Award, ShieldCheck, XCircle, Loader2 } from "lucide-react";
 
+
 export default function Profile() {
   const { user, showToast } = useApp();
   

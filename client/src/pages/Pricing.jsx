@@ -5,6 +5,9 @@ import SectionHeading from "../components/SectionHeading.jsx";
 import Faq from "../components/Faq.jsx";
 import api from "../lib/api.js";
 
+import banner from "../assets/pricing.jpeg";
+
+
 const FALLBACK_PLANS = [
   {
     key: "drop-in",

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Play, MapPin, Users, Star, Activity, User, CreditCard } from "lucide-react";
-import gymBanner from "../assets/hero.jpeg";
+import gymBanner from "../assets/class.jpeg";
 
 const STATS = [
   { label: "PARTNER BOXES", value: "50+" },
@@ -30,7 +30,7 @@ export default function HeroSection() {
             </span>
           </div>
 
-          <h1 className="font-display text-white text-4xl sm:text-5xl lg:text-[3.5rem] leading-[0.85] uppercase tracking-tighter">
+          <h1 className="font-display text-white text-4xl sm:text-5xl lg:text-[3.0rem] leading-[0.85] uppercase tracking-tighter">
             YOUR BODY IS <br />
             CAPABLE OF <br />
             <span className="text-[#CCFF00]">AMAZING THINGS.</span>
