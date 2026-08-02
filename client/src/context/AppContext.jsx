@@ -71,6 +71,7 @@ export function AppProvider({ children }) {
       full_name: signupData.full_name?.trim(),
       email: signupData.email?.trim().toLowerCase(), // Enforce absolute lowercase
       password: signupData.password, // Keep exact password matching
+      role: signupData.role, // Must be forwarded or every signup silently becomes "client"
     };
 
     // Only attach phone if the user actually typed something into it

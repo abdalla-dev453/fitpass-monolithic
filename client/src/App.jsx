@@ -10,6 +10,7 @@ import About from "./pages/About.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Profile from "./pages/Profile.jsx";
 import Login from "./pages/Login.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Register from "./pages/Register.jsx";
 
 // Import your custom security wrapper
@@ -37,6 +38,7 @@ export default function App() {
           {/* --- STAFF COMMAND LAYER ONLY (Trainer & Admin) --- */}
           <Route element={<ProtectedRoute allowedRoles={["trainer", "admin"]} />}>
             <Route path="/classes" element={<Classes />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
 
           {/* --- EXCLUSIVE ADMIN SECURITY ROOT NODE (Optional Placeholder) --- */}
