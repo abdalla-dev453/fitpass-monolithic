@@ -29,7 +29,13 @@ def create_app():
     # Configuration settings
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret")
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-jwt-secret")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
+    database_uri = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
+    # Render supplies Postgres URLs as `postgresql://...`. Explicitly select
+    # Psycopg 3 (declared in requirements.txt) so SQLAlchemy does not try to
+    # load the uninstalled legacy psycopg2 driver.
+    if database_uri.startswith(("postgres://", "postgresql://")):
+        database_uri = f"postgresql+psycopg://{database_uri.split('://', 1)[1]}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
