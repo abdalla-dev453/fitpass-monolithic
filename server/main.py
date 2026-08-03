@@ -44,22 +44,27 @@ def create_app():
     ma.init_app(app)
 
     # ONE SOURCE OF TRUTH CORS CONFIGURATION
-    # Fixed: Swapped generic vercel placeholder back to your exact live frontend URL
-    allowed_origins = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://fitpass-monolithic-t8u7.vercel.app"
-    ]
-    
+    cors_origins = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,https://fitpass-monolithic-t8u7.vercel.app"
+    )
+    allowed_origins = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+
+    # If the environment permits any origin for testing, disable credentials support.
+    supports_credentials = True
+    if "*" in allowed_origins:
+        allowed_origins = ["*"]
+        supports_credentials = False
+
     cors.init_app(
-        app, 
+        app,
         resources={r"/*": {
             "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
             "expose_headers": ["Content-Type", "Authorization"]
-        }}, 
-        supports_credentials=True
+        }},
+        supports_credentials=supports_credentials,
     )
 
     # Register Blueprints

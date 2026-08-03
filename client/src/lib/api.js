@@ -1,4 +1,10 @@
-const API_URL = (import.meta.env.VITE_API_URL || "https://onrender.com").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL || "http://127.0.0.1:5000").replace(/\/$/, "");
+
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+  console.warn(
+    "VITE_API_URL is not defined. The app is using the local fallback http://127.0.0.1:5000, which will fail in production deployments."
+  );
+}
 
 function getToken() {
   return localStorage.getItem("fitpass_token");
