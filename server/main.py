@@ -3,23 +3,27 @@ from flask import Flask, jsonify
 from dotenv import load_dotenv
 from marshmallow import ValidationError
 
-from extensions import db, jwt, cors, migrate, ma
+from .extensions import db, jwt, cors, migrate, ma
 
 # Import models so Flask-Migrate picks them up
-import models.user         
-import models.studio       
-import models.trainer     
-import models.class_category 
-import models.fitness_class   
-import models.pass_model   
-import models.booking  
+from .models import (
+    user,
+    studio,
+    trainer,
+    class_category,
+    fitness_class,
+    pass_model,
+    booking,
+)
 
 # Import blueprints
-from blueprints.auth import auth_bp
-from blueprints.studios import studios_bp
-from blueprints.classes import classes_bp
-from blueprints.passes import passes_bp
-from blueprints.bookings import bookings_bp
+from .blueprints.auth import auth_bp
+from .blueprints.studios import studios_bp
+from .blueprints.classes import classes_bp
+from .blueprints.passes import passes_bp
+from .blueprints.bookings import bookings_bp
+from .blueprints.trainers import trainers_bp
+
 
 load_dotenv()
 
