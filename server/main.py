@@ -3,10 +3,11 @@ from flask import Flask, jsonify
 from dotenv import load_dotenv
 from marshmallow import ValidationError
 
-from .extensions import db, jwt, cors, migrate, ma
+# Fixed: Removed the leading dots to convert from relative to absolute imports
+from extensions import db, jwt, cors, migrate, ma
 
 # Import models so Flask-Migrate picks them up
-from .models import (
+from models import (
     user,
     studio,
     trainer,
@@ -17,12 +18,12 @@ from .models import (
 )
 
 # Import blueprints
-from .blueprints.auth import auth_bp
-from .blueprints.studios import studios_bp
-from .blueprints.classes import classes_bp
-from .blueprints.passes import passes_bp
-from .blueprints.bookings import bookings_bp
-from .blueprints.trainers import trainers_bp
+from blueprints.auth import auth_bp
+from blueprints.studios import studios_bp
+from blueprints.classes import classes_bp
+from blueprints.passes import passes_bp
+from blueprints.bookings import bookings_bp
+from blueprints.trainers import trainers_bp
 
 
 load_dotenv()
@@ -43,11 +44,11 @@ def create_app():
     ma.init_app(app)
 
     # ONE SOURCE OF TRUTH CORS CONFIGURATION
-    # We define explicit origins, methods, and headers to clear the preflight checks cleanly.
+    # Fixed: Swapped generic vercel placeholder back to your exact live frontend URL
     allowed_origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://vercel.app"
+        "https://fitpass-monolithic-t8u7.vercel.app"
     ]
     
     cors.init_app(
