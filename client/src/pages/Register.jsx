@@ -11,7 +11,8 @@ export default function Register() {
     full_name: "",
     email: "", 
     password: "", 
-    phone: ""
+    phone: "",
+    role: "client",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,7 +20,7 @@ export default function Register() {
   // Proactive redirection: If user is already logged in, redirect away from register
   useEffect(() => {
     if (user) {
-      navigate(user.role === "admin" ? "/admin-dashboard" : "/classes");
+      navigate(user.role === "admin" ? "/admin-dashboard" : user.role === "trainer" ? "/trainer-dashboard" : "/classes");
     }
   }, [user, navigate]);
 
@@ -29,7 +30,7 @@ export default function Register() {
     setError(null);
     try {
       await register(form);
-      navigate("/classes"); // Redirect straight to dashboard on success
+      navigate(form.role === "trainer" ? "/trainer-dashboard" : "/classes");
     } catch (err) {
       // Catch Flask Marshmallow validator errors or custom duplicate key alerts
       const errorMsg = err.response?.data?.error || err.message || "REGISTRATION PIPELINE REJECTED.";
@@ -70,6 +71,19 @@ export default function Register() {
 
         {/* INPUT DISPATCH FORM CHASSIS */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black tracking-widest text-zinc-500">ACCOUNT TYPE</label>
+            <select
+              value={form.role}
+              disabled={loading}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="w-full border-2 border-zinc-800 bg-zinc-900 px-3 py-3 text-xs font-black tracking-widest text-white focus:outline-none focus:border-[#CCFF00]"
+            >
+              <option value="client">STANDARD MEMBER — BOOK CLASSES & BUY PASSES</option>
+              <option value="trainer">TRAINER — CREATE & MANAGE MY CLASSES</option>
+            </select>
+            <p className="text-[9px] font-bold tracking-wide text-zinc-600">ADMIN ACCOUNTS ARE CREATED BY AN EXISTING ADMINISTRATOR.</p>
+          </div>
           
           {/* FULL NAME ALLOCATION FIELD */}
           <div className="space-y-1.5">

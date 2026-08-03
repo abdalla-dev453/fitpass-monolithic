@@ -15,7 +15,7 @@ export default function Login() {
   // Proactive redirection: If user is logged in, kick them out of login page
   useEffect(() => {
     if (user) {
-      navigate(user.role === "admin" ? "/admin-dashboard" : "/classes");
+      navigate(user.role === "admin" ? "/admin-dashboard" : user.role === "trainer" ? "/trainer-dashboard" : "/classes");
     }
   }, [user, navigate]);
 
@@ -24,8 +24,8 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      await login(form);
-      navigate("/classes"); 
+      const data = await login(form);
+      navigate(data.user?.role === "admin" ? "/admin-dashboard" : data.user?.role === "trainer" ? "/trainer-dashboard" : "/classes");
     } catch (err) {
       // Safely extract message from Flask response or fallback
       const errorMsg = err.response?.data?.error || err.message || "AUTHENTICATION FAILED.";

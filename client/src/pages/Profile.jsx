@@ -145,13 +145,13 @@ export default function Profile() {
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-black uppercase text-white tracking-wide">{booking.class_name || "SESSION GROUP WORKOUT"}</span>
+                          <span className="text-xs font-black uppercase text-white tracking-wide">{booking.class_title || "SESSION GROUP WORKOUT"}</span>
                           <span className="text-[7px] font-black px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 uppercase tracking-widest">
                             {booking.studio_name || "HQ STUDIO"}
                           </span>
                         </div>
                         <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
-                          TIMELOCK: {booking.date || "PENDING"} // {booking.time || "00:00"}
+                          TIMELOCK: {booking.start_time ? new Date(booking.start_time).toLocaleString() : "PENDING"}
                         </p>
                       </div>
 

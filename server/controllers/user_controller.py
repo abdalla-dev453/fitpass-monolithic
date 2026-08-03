@@ -1,5 +1,6 @@
 from extensions import db
 from models.user import User
+from models.trainer import Trainer
 
 class UserController:
     @classmethod
@@ -8,9 +9,10 @@ class UserController:
 
     @classmethod
     def register_user(cls, data):
-        # Public registration must never grant privileged roles. Trainers and
-        # administrators are provisioned through trusted back-office workflows.
-        role = "client"
+        # Admin accounts must be provisioned by a trusted administrator. A
+        # trainer account is safe to self-register, but receives only control
+        # of classes assigned to that trainer profile.
+        role = data.get("role") if data.get("role") in ("client", "trainer") else "client"
 
         user = User(
             email=data.get("email"),
@@ -21,6 +23,9 @@ class UserController:
         user.set_password(data.get("password"))
         db.session.add(user)
         db.session.flush()  # get user.id before commit for the Trainer FK below
+
+        if role == "trainer":
+            db.session.add(Trainer(user_id=user.id))
 
         db.session.commit()
         return user

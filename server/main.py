@@ -20,6 +20,7 @@ from blueprints.studios import studios_bp
 from blueprints.classes import classes_bp
 from blueprints.passes import passes_bp
 from blueprints.bookings import bookings_bp
+from blueprints.trainers import trainers_bp
 
 load_dotenv()
 
@@ -60,6 +61,7 @@ def create_app():
     app.register_blueprint(classes_bp, url_prefix="/classes")
     app.register_blueprint(passes_bp, url_prefix="/passes")
     app.register_blueprint(bookings_bp, url_prefix="/bookings")
+    app.register_blueprint(trainers_bp, url_prefix="/trainers")
 
     # Global Error Handlers
     @app.errorhandler(404)

@@ -106,7 +106,8 @@ if unset — see `client/src/lib/api.js`).
 
 Create a Render Postgres database and set the backend service's `DATABASE_URI`
 to its **internal connection URL**. This repository includes `psycopg`, the
-PostgreSQL driver required by SQLAlchemy.
+PostgreSQL driver required by SQLAlchemy; `main.py` automatically converts
+Render's `postgresql://...` URL to the required Psycopg 3 dialect.
 
 Set the backend service's Root Directory to `server` and Start Command to:
 

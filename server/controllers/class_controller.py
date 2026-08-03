@@ -50,6 +50,27 @@ class ClassController:
             raise ValueError(f"Failed to create class: {str(e)}")
 
     @classmethod
+    def update_class(cls, fitness_class, data):
+        try:
+            for field in ("title", "description", "capacity", "start_time", "end_time", "studio_id", "trainer_id", "category_id"):
+                if field in data:
+                    setattr(fitness_class, field, data[field])
+            db.session.commit()
+            return fitness_class
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Failed to update class: {str(e)}")
+
+    @classmethod
+    def delete_class(cls, fitness_class):
+        try:
+            db.session.delete(fitness_class)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Failed to delete class: {str(e)}")
+
+    @classmethod
     def count_bookings(cls, fitness_class):
         """Get booking count for a fitness class."""
         return len(fitness_class.bookings) if fitness_class.bookings else 0

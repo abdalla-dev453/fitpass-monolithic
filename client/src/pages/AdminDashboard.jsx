@@ -1,268 +1,102 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../lib/api";
+import { useApp } from "../context/AppContext.jsx";
 
-export default function AdminDashboard() {
+const emptyClass = { title: "", studio_id: "", category_id: "", trainer_id: "", capacity: "", start_time: "", end_time: "" };
+const emptyStudio = { name: "", location: "", description: "" };
+
+export default function AdminDashboard({ trainerMode = false }) {
+  const { user, showToast } = useApp();
   const [classes, setClasses] = useState([]);
   const [studios, setStudios] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [activeTab, setActiveTab] = useState("create");
-  const [errorMessages, setErrorMessages] = useState(null);
+  const [trainers, setTrainers] = useState([]);
+  const [tab, setTab] = useState("classes");
+  const [classForm, setClassForm] = useState(emptyClass);
+  const [studioForm, setStudioForm] = useState(emptyStudio);
+  const [busy, setBusy] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    studio_id: "",
-    category_id: "",
-    trainer_id: "",
-    capacity: "",
-    start_time: "",
-    end_time: "",
-  });
-
-  // Pull existing structural data straight from Flask on component mount
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const load = async () => {
     try {
-      // Execute parallel network dispatches to hydrate dropdown modules
-      const [classesData, studiosData, categoriesData] = await Promise.all([
-        api.getClasses(),
-        api.getStudios(),
-        api.getCategories()
-      ]);
-
-      setClasses(classesData);
-      setStudios(studiosData);
-      setCategories(categoriesData);
-    } catch (err) {
-      console.error("Pipeline failure fetching operational configurations:", err.message);
+      const baseRequests = [api.getClasses(), api.getStudios(), api.getCategories()];
+      if (!trainerMode) baseRequests.push(api.getTrainers());
+      const [classData, studioData, categoryData, trainerData = []] = await Promise.all(baseRequests);
+      // The API still exposes the public timetable, but a trainer's workspace
+      // only presents classes they are authorised to manage.
+      setClasses(trainerMode ? classData.filter((item) => item.trainer_name === user?.full_name) : classData);
+      setStudios(studioData);
+      setCategories(categoryData);
+      setTrainers(trainerData);
+    } catch (error) {
+      showToast(error.message || "Could not load management data.");
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => { load(); }, [trainerMode, user?.full_name]);
 
-  const handleCreateClass = async (e) => {
-    e.preventDefault();
-    setErrorMessages(null);
-
-    // Prepare payload matching your exact Marshmallow schema validation data keys
-    const payload = {
-      title: formData.title.toUpperCase(),
-      studio_id: parseInt(formData.studio_id),
-      category_id: parseInt(formData.category_id),
-      trainer_id: formData.trainer_id ? parseInt(formData.trainer_id) : 1, // Fallback integer if omitted
-      capacity: parseInt(formData.capacity),
-      start_time: formData.start_time,
-      end_time: formData.end_time,
-    };
-
+  const createClass = async (event) => {
+    event.preventDefault();
+    setBusy(true);
     try {
-      const response = await api.createClass(payload);
-
-      // Handle array structure variance safely depending on your controllers wrapper dictionary
-      const newClassObject = response.data || response;
-      setClasses([newClassObject, ...classes]);
-
-      // Flush selection matrix metrics clean
-      setFormData({ title: "", studio_id: "", category_id: "", trainer_id: "", capacity: "", start_time: "", end_time: "" });
-      setActiveTab("manage");
-      alert(response.message || "Class Deployed Securely!");
-    } catch (err) {
-      try {
-        const structuralErrors = JSON.parse(err.message);
-        setErrorMessages(structuralErrors);
-      } catch {
-        alert(`Access Denied or Database Connection Dropped: ${err.message}`);
-      }
-    }
+      const payload = {
+        ...classForm,
+        studio_id: Number(classForm.studio_id), category_id: Number(classForm.category_id),
+        capacity: Number(classForm.capacity),
+      };
+      if (!trainerMode) payload.trainer_id = Number(classForm.trainer_id);
+      else delete payload.trainer_id;
+      await api.createClass(payload);
+      setClassForm(emptyClass);
+      showToast("Class created.");
+      await load();
+    } catch (error) { showToast(error.message || "Could not create class."); }
+    finally { setBusy(false); }
   };
 
-  return (
-    <div className="min-h-screen bg-[#0B0B0C] pt-28 px-6 md:px-12 selection:bg-[#CCFF00] selection:text-black text-white">
-      <div className="max-w-7xl mx-auto">
+  const createStudio = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      await api.createStudio(studioForm);
+      setStudioForm(emptyStudio);
+      showToast("Studio created.");
+      await load();
+    } catch (error) { showToast(error.message || "Could not create studio."); }
+    finally { setBusy(false); }
+  };
 
-        {/* Header Node */}
-        <div className="border-b border-zinc-800/60 pb-6 mb-8">
-          <span className="text-[9px] font-black tracking-[0.2em] bg-zinc-900 border border-zinc-800 text-[#CCFF00] px-2.5 py-1 uppercase">
-            System Console Active
-          </span>
-          <h1 className="text-3xl font-black text-white tracking-tighter uppercase mt-4">
-            CORE CONTROL PIPELINE
-          </h1>
-          <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider font-medium">
-            Administrative terminal matrix for the Fitpass synchronized network distribution ecosystem.
-          </p>
-        </div>
+  const removeClass = async (id) => {
+    if (!window.confirm("Delete this class? This cannot be undone.")) return;
+    try { await api.deleteClass(id); setClasses((items) => items.filter((item) => item.id !== id)); showToast("Class deleted."); }
+    catch (error) { showToast(error.message || "Could not delete class."); }
+  };
 
-        {/* Error Validation Debugger Overlay */}
-        {errorMessages && (
-          <div className="mb-6 p-4 bg-red-950/40 border border-red-900 text-red-400 text-xs uppercase tracking-wide rounded-xl">
-            <span className="font-bold">// Validation Pipeline Failure:</span>
-            <pre className="mt-2 font-mono text-[10px] whitespace-pre-wrap">
-              {JSON.stringify(errorMessages, null, 2)}
-            </pre>
-          </div>
-        )}
+  const removeStudio = async (id) => {
+    if (!window.confirm("Delete this empty studio?")) return;
+    try { await api.deleteStudio(id); setStudios((items) => items.filter((item) => item.id !== id)); showToast("Studio deleted."); }
+    catch (error) { showToast(error.message || "Could not delete studio."); }
+  };
 
-        {/* Dashboard Navigation Tabs */}
-        <div className="flex gap-4 border-b border-zinc-900 pb-4 mb-8">
-          {["create", "manage"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
-                activeTab === tab
-                  ? "bg-[#CCFF00] text-black"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
-              }`}
-            >
-              {tab === "create" ? "Deploy New Class" : "Manage Sessions & Bookings"}
-            </button>
-          ))}
-        </div>
-
-        {/* TAB 1: CREATE A FITNESS CLASS */}
-        {activeTab === "create" && (
-          <div className="max-w-2xl bg-zinc-950/40 border border-zinc-800/60 p-8 rounded-2xl shadow-xl backdrop-blur-xl">
-            <h2 className="text-sm font-black tracking-widest text-[#CCFF00] uppercase mb-6">
-              // INITIALIZE CLASS INSTANCE
-            </h2>
-            <form onSubmit={handleCreateClass} className="space-y-6">
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 tracking-wider mb-2">Class Variant Name</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="e.g. HIIT OVERLOAD"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] uppercase text-white"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* STUDIO SELECT DROPDOWN */}
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 tracking-wider mb-2">Studio Cluster Node</label>
-                  <select
-                    name="studio_id"
-                    value={formData.studio_id}
-                    onChange={handleInputChange}
-                    className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] text-zinc-400 uppercase cursor-pointer"
-                    required
-                  >
-                    <option value="">-- Resolve Cluster ID --</option>
-                    {studios.map((studio) => (
-                      <option key={studio.id} value={studio.id} className="bg-zinc-950 text-white">
-                        {studio.name || `STUDIO TARGET ID ${studio.id}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* CATEGORY SELECT DROPDOWN */}
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 tracking-wider mb-2">Class Classification Variant</label>
-                  <select
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleInputChange}
-                    className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] text-zinc-400 uppercase cursor-pointer"
-                    required
-                  >
-                    <option value="">-- Resolve Category --</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id} className="bg-zinc-950 text-white">
-                        {cat.name || `CATEGORY ID ${cat.id}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* TRAINER MANIFEST IDENTIFIER */}
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 tracking-wider mb-2">Trainer Operator ID</label>
-                  <input
-                    type="number"
-                    name="trainer_id"
-                    value={formData.trainer_id}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 1"
-                    className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] text-white"
-                    required
-                  />
-                </div>
-
-                {/* ATTENDEE MAXIMUM CAPACITY */}
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 tracking-wider mb-2">Attendee Capacity</label>
-                  <input
-                    type="number"
-                    name="capacity"
-                    value={formData.capacity}
-                    onChange={handleInputChange}
-                    placeholder="25"
-                    className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] text-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 tracking-wider mb-2">Schedule Timeline Allocation</label>
-                <input
-                  type="datetime-local"
-                  name="start_time"
-                  value={formData.start_time}
-                  onChange={handleInputChange}
-                  className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] text-white"
-                  required
-                />
-                <input
-                  type="datetime-local"
-                  name="end_time"
-                  value={formData.end_time}
-                  onChange={handleInputChange}
-                  className="w-full bg-zinc-900 border border-zinc-800 text-sm p-3 focus:outline-none focus:border-[#CCFF00] text-white"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="bg-[#CCFF00] text-black font-bold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-[#b3e600] transition-all"
-              >
-                Deploy Class
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* TAB 2: MANAGE CLASSES AND BOOKINGS */}
-        {activeTab === "manage" && (
-          <div className="space-y-6">
-            <h2 className="text-sm font-black tracking-widest text-[#CCFF00] uppercase mb-4">
-              // SESSION & BOOKING MANAGEMENT
-            </h2>
-            {classes.length === 0 ? (
-              <p className="text-zinc-400 text-xs">No active classes found. Deploy a new class to manage bookings.</p>
-            ) : (
-              classes.map((cls) => (
-                <div key={cls.id} className="bg-zinc-950/40 border border-zinc-800/60 p-6 rounded-2xl shadow-lg backdrop-blur-xl">
-                  <h3 className="text-sm font-bold text-[#CCFF00] uppercase tracking-wider mb-2">{cls.title}</h3>
-                  <p className="text-xs text-zinc-400 mb-4">
-                    Studio: {cls.studio_name || `ID ${cls.studio_id}`} | Category: {cls.category_name || `ID ${cls.category_id}`} | Capacity: {cls.capacity} | Start Time: {new Date(cls.start_time).toLocaleString()} | End Time: {new Date(cls.end_time).toLocaleString()}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </div>
+  const field = "w-full bg-zinc-900 border border-zinc-700 px-3 py-3 text-sm text-white focus:outline-none focus:border-[#CCFF00]";
+  return <main className="min-h-screen bg-[#0B0B0C] pt-28 px-6 pb-16 text-white"><div className="max-w-6xl mx-auto">
+    <p className="text-xs font-black tracking-widest text-[#CCFF00] uppercase">{trainerMode ? "Trainer workspace" : "Admin dashboard"}</p>
+    <h1 className="mt-2 text-3xl font-black uppercase">{trainerMode ? "Create and manage your classes" : "Studio and class control"}</h1>
+    <p className="mt-2 text-sm text-zinc-400">Signed in as {user?.full_name}.</p>
+    <div className="mt-8 flex gap-3 border-b border-zinc-800 pb-4">
+      <button className="btn-primary" onClick={() => setTab("classes")}>Classes</button>
+      {!trainerMode && <button className="btn-primary" onClick={() => setTab("studios")}>Studios</button>}
     </div>
-  );
+    {tab === "classes" && <section className="mt-8 grid gap-8 lg:grid-cols-[420px_1fr]"><form onSubmit={createClass} className="space-y-4 border border-zinc-800 bg-zinc-950 p-6">
+      <h2 className="font-black uppercase">Create a class</h2>
+      <input required className={field} placeholder="Class title" value={classForm.title} onChange={(e) => setClassForm({...classForm, title:e.target.value})} />
+      <select required className={field} value={classForm.studio_id} onChange={(e) => setClassForm({...classForm, studio_id:e.target.value})}><option value="">Select studio</option>{studios.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+      <select required className={field} value={classForm.category_id} onChange={(e) => setClassForm({...classForm, category_id:e.target.value})}><option value="">Select category</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+      {!trainerMode && <select required className={field} value={classForm.trainer_id} onChange={(e) => setClassForm({...classForm, trainer_id:e.target.value})}><option value="">Assign trainer</option>{trainers.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}</select>}
+      <input required min="1" type="number" className={field} placeholder="Capacity" value={classForm.capacity} onChange={(e) => setClassForm({...classForm, capacity:e.target.value})} />
+      <label className="block text-xs text-zinc-400">Start time<input required type="datetime-local" className={`${field} mt-1`} value={classForm.start_time} onChange={(e) => setClassForm({...classForm, start_time:e.target.value})} /></label>
+      <label className="block text-xs text-zinc-400">End time<input required type="datetime-local" className={`${field} mt-1`} value={classForm.end_time} onChange={(e) => setClassForm({...classForm, end_time:e.target.value})} /></label>
+      <button disabled={busy} className="btn-primary w-full">{busy ? "Saving..." : "Create class"}</button>
+    </form><div className="space-y-3"><h2 className="font-black uppercase">Scheduled classes</h2>{classes.map((item) => <article key={item.id} className="border border-zinc-800 bg-zinc-950 p-5"><div className="flex justify-between gap-4"><div><h3 className="font-bold text-[#CCFF00]">{item.title}</h3><p className="mt-1 text-sm text-zinc-400">{item.studio_name} · {item.trainer_name} · {new Date(item.start_time).toLocaleString()}</p></div><button onClick={() => removeClass(item.id)} className="text-xs font-bold text-red-400">DELETE</button></div></article>)}</div></section>}
+    {tab === "studios" && <section className="mt-8 grid gap-8 lg:grid-cols-[420px_1fr]"><form onSubmit={createStudio} className="space-y-4 border border-zinc-800 bg-zinc-950 p-6"><h2 className="font-black uppercase">Add a studio</h2><input required className={field} placeholder="Studio name" value={studioForm.name} onChange={(e) => setStudioForm({...studioForm, name:e.target.value})}/><input required className={field} placeholder="Location" value={studioForm.location} onChange={(e) => setStudioForm({...studioForm, location:e.target.value})}/><textarea className={field} placeholder="Description (optional)" value={studioForm.description} onChange={(e) => setStudioForm({...studioForm, description:e.target.value})}/><button disabled={busy} className="btn-primary w-full">Add studio</button></form><div className="space-y-3"><h2 className="font-black uppercase">Studios</h2>{studios.map((item) => <article key={item.id} className="border border-zinc-800 bg-zinc-950 p-5 flex justify-between gap-4"><div><h3 className="font-bold text-[#CCFF00]">{item.name}</h3><p className="mt-1 text-sm text-zinc-400">{item.location}</p></div><button onClick={() => removeStudio(item.id)} className="text-xs font-bold text-red-400">DELETE</button></article>)}</div></section>}
+  </div></main>;
 }

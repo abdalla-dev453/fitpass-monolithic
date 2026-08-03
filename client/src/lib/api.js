@@ -34,6 +34,9 @@ const api = {
     request(`/studios/${location ? `?location=${encodeURIComponent(location)}` : ""}`),
   getStudio: (studioId) => request(`/studios/${studioId}`),
   getStudioSchedule: (studioId) => request(`/studios/${studioId}/schedule`),
+  createStudio: (payload) => request("/studios/", { method: "POST", body: JSON.stringify(payload) }),
+  updateStudio: (studioId, payload) => request(`/studios/${studioId}`, { method: "PUT", body: JSON.stringify(payload) }),
+  deleteStudio: (studioId) => request(`/studios/${studioId}`, { method: "DELETE" }),
 
   getClasses: (params = {}) => {
     const qs = new URLSearchParams(
@@ -45,6 +48,10 @@ const api = {
   getClass: (classId) => request(`/classes/${classId}`),
   createClass: (payload) =>
     request("/classes/", { method: "POST", body: JSON.stringify(payload) }),
+  updateClass: (classId, payload) =>
+    request(`/classes/${classId}`, { method: "PUT", body: JSON.stringify(payload) }),
+  deleteClass: (classId) => request(`/classes/${classId}`, { method: "DELETE" }),
+  getTrainers: () => request("/trainers/"),
 
   getPassPlans: () => request("/passes/plans"),
   getMyPasses: () => request("/passes/my-passes"),

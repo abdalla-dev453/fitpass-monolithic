@@ -102,7 +102,7 @@ export function AppProvider({ children }) {
       full_name: signupData.full_name?.trim(),
       email: signupData.email?.trim().toLowerCase(),
       password: signupData.password,
-      role: "client",
+      role: signupData.role === "trainer" ? "trainer" : "client",
     };
 
     if (signupData.phone && signupData.phone.trim() !== "") {

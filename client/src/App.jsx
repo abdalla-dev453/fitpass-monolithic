@@ -42,6 +42,10 @@ export default function App() {
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
 
+          <Route element={<ProtectedRoute allowedRoles={["trainer"]} />}>
+            <Route path="/trainer-dashboard" element={<AdminDashboard trainerMode />} />
+          </Route>
+
           {/* --- EXCLUSIVE ADMIN SECURITY ROOT NODE (Optional Placeholder) --- */}
           {/* 
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>

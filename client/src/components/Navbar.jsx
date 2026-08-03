@@ -36,6 +36,11 @@ export default function Navbar() {
       label: "CORE CONTROL", 
       visible: user && user.role === "admin" 
     },
+    {
+      path: "/trainer-dashboard",
+      label: "MY CLASSES",
+      visible: user && user.role === "trainer"
+    },
   ];
 
   // Filtering out active links for current compilation matching state

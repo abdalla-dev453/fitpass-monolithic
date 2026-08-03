@@ -1,6 +1,7 @@
 from datetime import datetime
 from models.studio import Studio
 from models.fitness_class import FitnessClass
+from extensions import db
 
 
 class StudioController:
@@ -25,3 +26,25 @@ class StudioController:
             .order_by(FitnessClass.start_time.asc())
             .all()
         )
+
+    @classmethod
+    def create_studio(cls, studio):
+        db.session.add(studio)
+        db.session.commit()
+        return studio
+
+    @classmethod
+    def update_studio(cls, studio, data):
+        for field in ("name", "location", "description"):
+            if field in data:
+                setattr(studio, field, data[field])
+        db.session.commit()
+        return studio
+
+    @classmethod
+    def delete_studio(cls, studio):
+        if studio.classes.count():
+            return False
+        db.session.delete(studio)
+        db.session.commit()
+        return True
