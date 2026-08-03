@@ -20,7 +20,6 @@ from blueprints.studios import studios_bp
 from blueprints.classes import classes_bp
 from blueprints.passes import passes_bp
 from blueprints.bookings import bookings_bp
-from blueprints.trainers import trainers_bp
 
 load_dotenv()
 
@@ -30,13 +29,7 @@ def create_app():
     # Configuration settings
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret")
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-jwt-secret")
-    database_uri = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
-    # Render supplies Postgres URLs as `postgresql://...`. Explicitly select
-    # Psycopg 3 (declared in requirements.txt) so SQLAlchemy does not try to
-    # load the uninstalled legacy psycopg2 driver.
-    if database_uri.startswith(("postgres://", "postgresql://")):
-        database_uri = f"postgresql+psycopg://{database_uri.split('://', 1)[1]}"
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
@@ -45,15 +38,24 @@ def create_app():
     migrate.init_app(app, db)
     ma.init_app(app)
 
-    # CORS origins must match the browser's Origin header exactly.  Keep the
-    # deployed frontend URL in the default for a usable first deployment, and
-    # configure CORS_ORIGINS in the hosting provider for other environments.
-    allowed_origins = os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,https://fitpass-monolithic-t8u7.vercel.app",
-    ).split(",")
-    allowed_origins = [origin.strip() for origin in allowed_origins if origin.strip()]
-    cors.init_app(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
+    # ONE SOURCE OF TRUTH CORS CONFIGURATION
+    # We define explicit origins, methods, and headers to clear the preflight checks cleanly.
+    allowed_origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://vercel.app"
+    ]
+    
+    cors.init_app(
+        app, 
+        resources={r"/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+            "expose_headers": ["Content-Type", "Authorization"]
+        }}, 
+        supports_credentials=True
+    )
 
     # Register Blueprints
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -61,7 +63,6 @@ def create_app():
     app.register_blueprint(classes_bp, url_prefix="/classes")
     app.register_blueprint(passes_bp, url_prefix="/passes")
     app.register_blueprint(bookings_bp, url_prefix="/bookings")
-    app.register_blueprint(trainers_bp, url_prefix="/trainers")
 
     # Global Error Handlers
     @app.errorhandler(404)
