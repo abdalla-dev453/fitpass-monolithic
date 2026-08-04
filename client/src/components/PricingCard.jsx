@@ -1,11 +1,20 @@
-import React from "react";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext.jsx";
 
 export default function PricingCard({ plan }) {
-  const { purchasePlan, myPass } = useApp();
+  const { purchasePlan, myPass, user, showToast } = useApp();
+  const navigate = useNavigate();
 
   const isActivePass = myPass?.key === plan.key;
+  const handleClick = () => {
+    if (!user) {
+      showToast("Please log in before activating a pass.");
+      navigate("/login");
+      return;
+    }
+    purchasePlan(plan);
+  };
 
   return (
     <div
@@ -44,8 +53,15 @@ export default function PricingCard({ plan }) {
         {/* Feature Lists */}
         <ul className="mt-6 space-y-3 flex-1">
           {plan.perks.map((perk) => (
-            <li key={perk} className="flex items-center gap-2 text-xs font-bold text-zinc-300 uppercase tracking-wide">
-              <Check size={13} className="text-[#CCFF00] shrink-0" strokeWidth={3} />
+            <li
+              key={perk}
+              className="flex items-center gap-2 text-xs font-bold text-zinc-300 uppercase tracking-wide"
+            >
+              <Check
+                size={13}
+                className="text-[#CCFF00] shrink-0"
+                strokeWidth={3}
+              />
               <span>{perk}</span>
             </li>
           ))}
@@ -55,7 +71,7 @@ export default function PricingCard({ plan }) {
       {/* Heavy High-Contrast Footer Call-To-Action Button */}
       <div className="mt-8 pt-4">
         <button
-          onClick={() => purchasePlan(plan)}
+          onClick={handleClick}
           className={`w-full py-3.5 font-display text-xs font-black uppercase tracking-widest border-2 transition-all duration-100 ${
             isActivePass
               ? "bg-zinc-900 text-[#CCFF00] border-[#CCFF00] hover:bg-white hover:text-black hover:border-white"
@@ -64,7 +80,11 @@ export default function PricingCard({ plan }) {
                 : "bg-transparent text-white border-white hover:bg-white hover:text-black"
           }`}
         >
-          {isActivePass ? "ACTIVE — RENEW PASS" : "ACTIVATE ACCOUNT PASS"}
+          {isActivePass
+            ? "ACTIVE — RENEW PASS"
+            : user
+              ? "ACTIVATE ACCOUNT PASS"
+              : "LOG IN TO ACTIVATE PASS"}
         </button>
       </div>
     </div>

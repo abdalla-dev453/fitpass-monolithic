@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import api from "../lib/api";
 
 const AppContext = createContext(null);
@@ -22,14 +29,17 @@ export function AppProvider({ children }) {
     }
   }, []);
 
-  const showToast = useCallback((message) => {
-    setToast(message);
-    clearToastTimer();
-    toastTimer.current = window.setTimeout(() => {
-      setToast(null);
-      toastTimer.current = null;
-    }, 3200);
-  }, [clearToastTimer]);
+  const showToast = useCallback(
+    (message) => {
+      setToast(message);
+      clearToastTimer();
+      toastTimer.current = window.setTimeout(() => {
+        setToast(null);
+        toastTimer.current = null;
+      }, 3200);
+    },
+    [clearToastTimer],
+  );
 
   useEffect(() => {
     return () => clearToastTimer();
@@ -73,6 +83,16 @@ export function AppProvider({ children }) {
 
   const purchasePlan = useCallback(
     async (plan) => {
+      if (!user) {
+        showToast("Please log in before activating a pass.");
+        return;
+      }
+
+      if (!plan?.key) {
+        showToast("Unable to identify the selected pass plan.");
+        return;
+      }
+
       try {
         await api.purchasePass(plan.key || plan.id);
         setMyPass(plan);
@@ -81,45 +101,51 @@ export function AppProvider({ children }) {
         showToast(err.message || "Failed to complete pass purchase.");
       }
     },
-    [showToast]
+    [showToast, user],
   );
 
-  const login = useCallback(async (credentials) => {
-    try {
-      const data = await api.login(credentials);
-      localStorage.setItem("fitpass_token", data.access_token);
-      setUser(data.user || data);
-      showToast("Welcome back!");
-      return data;
-    } catch (err) {
-      showToast(err.message || "Login failed.");
-      throw err;
-    }
-  }, [showToast]);
+  const login = useCallback(
+    async (credentials) => {
+      try {
+        const data = await api.login(credentials);
+        localStorage.setItem("fitpass_token", data.access_token);
+        setUser(data.user || data);
+        showToast("Welcome back!");
+        return data;
+      } catch (err) {
+        showToast(err.message || "Login failed.");
+        throw err;
+      }
+    },
+    [showToast],
+  );
 
-  const register = useCallback(async (signupData) => {
-    const sanitizedPayload = {
-      full_name: signupData.full_name?.trim(),
-      email: signupData.email?.trim().toLowerCase(),
-      password: signupData.password,
-      role: signupData.role === "trainer" ? "trainer" : "client",
-    };
+  const register = useCallback(
+    async (signupData) => {
+      const sanitizedPayload = {
+        full_name: signupData.full_name?.trim(),
+        email: signupData.email?.trim().toLowerCase(),
+        password: signupData.password,
+        role: signupData.role === "trainer" ? "trainer" : "client",
+      };
 
-    if (signupData.phone && signupData.phone.trim() !== "") {
-      sanitizedPayload.phone = signupData.phone.trim();
-    }
+      if (signupData.phone && signupData.phone.trim() !== "") {
+        sanitizedPayload.phone = signupData.phone.trim();
+      }
 
-    try {
-      const data = await api.register(sanitizedPayload);
-      localStorage.setItem("fitpass_token", data.access_token);
-      setUser(data.user || data);
-      showToast("Account created successfully!");
-      return data;
-    } catch (err) {
-      showToast(err.message || "Registration failed.");
-      throw err;
-    }
-  }, [showToast]);
+      try {
+        const data = await api.register(sanitizedPayload);
+        localStorage.setItem("fitpass_token", data.access_token);
+        setUser(data.user || data);
+        showToast("Account created successfully!");
+        return data;
+      } catch (err) {
+        showToast(err.message || "Registration failed.");
+        throw err;
+      }
+    },
+    [showToast],
+  );
 
   const logout = useCallback(() => {
     localStorage.removeItem("fitpass_token");
