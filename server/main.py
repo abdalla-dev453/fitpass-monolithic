@@ -31,10 +31,19 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
 
+    app.url_map.strict_slashes = False
+
     # Configuration settings
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret")
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-jwt-secret")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
+
+    # FIX: Normalize the database URL scheme. Some providers hand out
+    # "postgres://" URLs, which SQLAlchemy 2.x rejects outright
+    # (raises NoSuchModuleError). This guarantees we always use "postgresql://".
+    db_url = os.getenv("DATABASE_URI", "sqlite:///fitpass.db")
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
@@ -73,6 +82,9 @@ def create_app():
     app.register_blueprint(classes_bp, url_prefix="/classes")
     app.register_blueprint(passes_bp, url_prefix="/passes")
     app.register_blueprint(bookings_bp, url_prefix="/bookings")
+    # FIX: this blueprint was imported but never registered, so GET /trainers
+    # always returned 404 in every environment.
+    app.register_blueprint(trainers_bp, url_prefix="/trainers")
 
     # Global Error Handlers
     @app.errorhandler(404)
