@@ -15,6 +15,7 @@ class FitnessClassSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
     title = fields.String(required=True, validate=validate.Length(min=2, max=100))
+    image_url = fields.String(validate=validate.Length(max=512), allow_none=True)
     capacity = fields.Integer(required=True, validate=validate.Range(min=1))
 
     def get_spots_remaining(self, obj):

@@ -7,6 +7,7 @@ class FitnessClass(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    image_url = db.Column(db.String(512), nullable=True)
     capacity = db.Column(db.Integer, nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)

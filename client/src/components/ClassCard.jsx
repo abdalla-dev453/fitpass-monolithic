@@ -1,18 +1,20 @@
-import React, { useState } from "react";
 import { Clock, MapPin, Users } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext.jsx";
 import api from "../lib/api.js";
 
 function formatClassTime(iso) {
   try {
-    return new Date(iso).toLocaleString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }).toUpperCase(); // Forced structural uppercase string conversion standard
+    return new Date(iso)
+      .toLocaleString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+      .toUpperCase(); // Forced structural uppercase string conversion standard
   } catch {
     return iso ? iso.toUpperCase() : iso;
   }
@@ -45,8 +47,29 @@ export default function ClassCard({ fitnessClass }) {
 
   return (
     <div className="border-2 border-zinc-800 bg-zinc-950 rounded-none overflow-hidden flex flex-col justify-between transition-all duration-150 transform hover:-translate-x-1 hover:-translate-y-1 hover:border-[#CCFF00]/50 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.02)] hover:shadow-[6px_6px_0px_0px_rgba(204,255,0,1)]">
+      {/* Class image/header */}
+      {fitnessClass.image_url ? (
+        <div className="w-full h-40 md:h-48 overflow-hidden bg-zinc-900">
+          <img
+            src={fitnessClass.image_url}
+            alt={fitnessClass.title || "Class image"}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src =
+                "https://via.placeholder.com/800x500?text=Class+Image";
+            }}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="w-full h-40 md:h-48 bg-zinc-800 flex items-center justify-center text-zinc-500">
+          NO IMAGE
+        </div>
+      )}
+
       <div className="p-5 md:p-6 flex-1">
-        
         {/* UPPER STATUS DISPATCH LAYER */}
         <div className="flex items-center justify-between gap-3 pb-4 border-b border-zinc-900">
           {fitnessClass.category_name ? (
@@ -56,7 +79,7 @@ export default function ClassCard({ fitnessClass }) {
           ) : (
             <div />
           )}
-          
+
           <span
             className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border ${
               isFull
@@ -73,7 +96,7 @@ export default function ClassCard({ fitnessClass }) {
         <h3 className="mt-4 font-display font-black text-xl text-white tracking-tight uppercase leading-none">
           {fitnessClass.title}
         </h3>
-        
+
         {fitnessClass.description && (
           <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500 leading-normal line-clamp-2 min-h-[30px]">
             {fitnessClass.description}
@@ -83,14 +106,23 @@ export default function ClassCard({ fitnessClass }) {
         {/* RUNTIME PARAMS FOOTNOTE GRID */}
         <div className="mt-5 pt-4 border-t border-zinc-900 space-y-2.5 text-[11px] font-black tracking-widest text-zinc-300 uppercase">
           <div className="flex items-center gap-2">
-            <Clock size={13} className="text-zinc-600 shrink-0" strokeWidth={2.5} />
+            <Clock
+              size={13}
+              className="text-zinc-600 shrink-0"
+              strokeWidth={2.5}
+            />
             <span>{formatClassTime(fitnessClass.start_time)}</span>
           </div>
           <div className="flex items-center gap-2 truncate">
-            <MapPin size={13} className="text-zinc-600 shrink-0" strokeWidth={2.5} />
+            <MapPin
+              size={13}
+              className="text-zinc-600 shrink-0"
+              strokeWidth={2.5}
+            />
             <span className="truncate">
               {fitnessClass.studio_name || "STATION TBD"}
-              {fitnessClass.trainer_name && ` • COACH ${fitnessClass.trainer_name}`}
+              {fitnessClass.trainer_name &&
+                ` • COACH ${fitnessClass.trainer_name}`}
             </span>
           </div>
         </div>
@@ -106,7 +138,11 @@ export default function ClassCard({ fitnessClass }) {
             : "bg-[#CCFF00] text-black border-[#CCFF00] hover:bg-white hover:text-black hover:border-white"
         }`}
       >
-        {isFull ? "STATION CAPACITY FULL" : isBooking ? "RESERVING..." : "RESERVE ACCOUNT SPOT"}
+        {isFull
+          ? "STATION CAPACITY FULL"
+          : isBooking
+            ? "RESERVING..."
+            : "RESERVE ACCOUNT SPOT"}
       </button>
     </div>
   );

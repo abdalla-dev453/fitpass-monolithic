@@ -16,6 +16,8 @@ from models import (
     pass_model,
     booking,
 )
+from models.studio import Studio
+from models.class_category import ClassCategory
 
 # Import blueprints
 from blueprints.auth import auth_bp
@@ -25,8 +27,41 @@ from blueprints.passes import passes_bp
 from blueprints.bookings import bookings_bp
 from blueprints.trainers import trainers_bp
 
-
 load_dotenv()
+
+
+def seed_default_data(app):
+    with app.app_context():
+        created = False
+
+        if Studio.query.count() == 0:
+            default_studios = [
+                Studio(
+                    name="Iron Pulse Lab (Downtown)",
+                    location="789 Innovation Way, Suite A",
+                    description="Premium high-energy facility equipped with modern turf yards, power racks, kettlebells, and heavy combat bags.",
+                ),
+                Studio(
+                    name="Zen & Core Oasis (Uptown)",
+                    location="432 Serenity Boulevard",
+                    description="Sunlit boutique space engineered for targeted deep-core work, group athletic conditioning, and recovery flows.",
+                ),
+            ]
+            db.session.add_all(default_studios)
+            created = True
+
+        if ClassCategory.query.count() == 0:
+            default_categories = [
+                ClassCategory(name="HIIT"),
+                ClassCategory(name="Strength & Conditioning"),
+                ClassCategory(name="Boxing"),
+            ]
+            db.session.add_all(default_categories)
+            created = True
+
+        if created:
+            db.session.commit()
+
 
 def create_app():
     app = Flask(__name__)
@@ -52,10 +87,12 @@ def create_app():
     migrate.init_app(app, db)
     ma.init_app(app)
 
+    seed_default_data(app)
+
     # ONE SOURCE OF TRUTH CORS CONFIGURATION
     cors_origins = os.getenv(
         "CORS_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,https://fitpass-monolithic-t8u7.vercel.app"
+        "http://localhost:5173,http://127.0.0.1:5173,https://fitpass-monolithic-t8u7.vercel.app",
     )
     allowed_origins = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
 
@@ -67,12 +104,14 @@ def create_app():
 
     cors.init_app(
         app,
-        resources={r"/*": {
-            "origins": allowed_origins,
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-            "expose_headers": ["Content-Type", "Authorization"]
-        }},
+        resources={
+            r"/*": {
+                "origins": allowed_origins,
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+                "expose_headers": ["Content-Type", "Authorization"],
+            }
+        },
         supports_credentials=supports_credentials,
     )
 
@@ -105,6 +144,7 @@ def create_app():
         return jsonify({"status": "online", "message": "FitPass API is active"}), 200
 
     return app
+
 
 app = create_app()
 

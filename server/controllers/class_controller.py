@@ -7,8 +7,15 @@ from models.class_category import ClassCategory
 
 class ClassController:
     @classmethod
-    def search_classes(cls, studio_id=None, category_id=None, trainer_id=None, q=None,
-                        start_date=None, end_date=None):
+    def search_classes(
+        cls,
+        studio_id=None,
+        category_id=None,
+        trainer_id=None,
+        q=None,
+        start_date=None,
+        end_date=None,
+    ):
         """Search fitness classes with optional filtering."""
         query = FitnessClass.query
 
@@ -52,7 +59,17 @@ class ClassController:
     @classmethod
     def update_class(cls, fitness_class, data):
         try:
-            for field in ("title", "description", "capacity", "start_time", "end_time", "studio_id", "trainer_id", "category_id"):
+            for field in (
+                "title",
+                "description",
+                "image_url",
+                "capacity",
+                "start_time",
+                "end_time",
+                "studio_id",
+                "trainer_id",
+                "category_id",
+            ):
                 if field in data:
                     setattr(fitness_class, field, data[field])
             db.session.commit()
