@@ -264,7 +264,7 @@ export default function AdminDashboard({ trainerMode = false }) {
               </button>
             </form>
             <div className="space-y-3">
-              <h2 className="font-black uppercase">Scheduled classes</h2>
+              <h2 className="text-yellow-500 uppercase">Scheduled classes</h2>
               {classes.map((item) => (
                 <article
                   key={item.id}
