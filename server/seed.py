@@ -122,7 +122,7 @@ def seed_database():
         class_upcoming_1 = FitnessClass(
             title="Next-Level HIIT Burn",
             description="Ignite your cardiovascular conditioning with explosive interval tracking designed to maximize raw power output.",
-            image_url="https://example.com/images/hiit-burn.jpg",
+            image_url="https://source.unsplash.com/1200x800/?hiit,workout",
             capacity=20,
             start_time=now + timedelta(days=1, hours=2),
             end_time=now + timedelta(days=1, hours=3),
@@ -135,7 +135,7 @@ def seed_database():
         class_upcoming_2 = FitnessClass(
             title="Heavy Iron Barbell Strength",
             description="Focus on fundamental compound lifting mechanics including compound deadlifts, squats, and functional presses.",
-            image_url="https://example.com/images/barbell-strength.jpg",
+            image_url="https://source.unsplash.com/1200x800/?weightlifting,barbell",
             capacity=12,
             start_time=now + timedelta(days=2, hours=4),
             end_time=now + timedelta(days=2, hours=5),
@@ -148,7 +148,7 @@ def seed_database():
         class_past_1 = FitnessClass(
             title="Championship Boxing Conditioning",
             description="High-octane shadow boxing combinations, heavy bag circuits, and fundamental core stability drills.",
-            image_url="https://example.com/images/boxing-conditioning.jpg",
+            image_url="https://source.unsplash.com/1200x800/?boxing,bag",
             capacity=15,
             start_time=now - timedelta(days=3, hours=2),
             end_time=now - timedelta(days=3, hours=1),
@@ -161,7 +161,7 @@ def seed_database():
         class_past_2 = FitnessClass(
             title="Explosive Calisthenics Core",
             description="Master your own bodyweight with progressive gymnastic adjustments, pull configurations, and stability flows.",
-            image_url="https://example.com/images/calisthenics-core.jpg",
+            image_url="https://source.unsplash.com/1200x800/?calisthenics,bodyweight",
             capacity=10,
             start_time=now - timedelta(days=6, hours=5),
             end_time=now - timedelta(days=6, hours=4),
@@ -173,7 +173,7 @@ def seed_database():
         class_upcoming_3 = FitnessClass(
             title="Recovery Flow and Stretch",
             description="A guided recovery session with mobility drills, foam rolling, and restorative movement for better performance.",
-            image_url="https://example.com/images/recovery-flow.jpg",
+            image_url="https://source.unsplash.com/1200x800/?recovery,yoga",
             capacity=18,
             start_time=now + timedelta(days=3, hours=1),
             end_time=now + timedelta(days=3, hours=2),
@@ -185,7 +185,7 @@ def seed_database():
         class_upcoming_4 = FitnessClass(
             title="Core Fusion Strength",
             description="Blend foundational strength with core-specific conditioning in a fast-paced, full-body class.",
-            image_url="https://example.com/images/core-fusion.jpg",
+            image_url="https://source.unsplash.com/1200x800/?core,fitness",
             capacity=22,
             start_time=now + timedelta(days=4, hours=2),
             end_time=now + timedelta(days=4, hours=3),
@@ -197,7 +197,7 @@ def seed_database():
         class_past_3 = FitnessClass(
             title="Boxing Fundamentals Circuit",
             description="Technical boxing work combined with conditioning stations for a full-body boxing circuit.",
-            image_url="https://example.com/images/boxing-fundamentals.jpg",
+            image_url="https://source.unsplash.com/1200x800/?boxing,training",
             capacity=16,
             start_time=now - timedelta(days=2, hours=3),
             end_time=now - timedelta(days=2, hours=2),
@@ -209,7 +209,7 @@ def seed_database():
         class_past_4 = FitnessClass(
             title="Yoga Strength Sculpt",
             description="Strength-based yoga flow designed to build muscular endurance, balance, and flexibility.",
-            image_url="https://example.com/images/yoga-strength.jpg",
+            image_url="https://source.unsplash.com/1200x800/?yoga,strength",
             capacity=14,
             start_time=now - timedelta(days=4, hours=1),
             end_time=now - timedelta(days=4),
