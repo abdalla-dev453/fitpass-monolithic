@@ -23,7 +23,6 @@ export default function Navbar() {
     // Protected Routes - require login, open to everyone logged in
     { path: "/studios", label: "STUDIOS", visible: !!user },
     { path: "/nutrition", label: "NUTRITION", visible: !!user },
-    { path: "/classes", label: "CLASSES", visible: !!user },
     { path: "/nearby-gyms", label: "NEARBY GYMS", visible: !!user },
     
     // Trainer or Admin clearance flags

@@ -73,7 +73,7 @@ export default function Profile() {
               <h1 className="font-display font-black text-2xl md:text-3xl uppercase tracking-tighter text-white">
                 {user?.full_name || "ANONYMOUS_ATHLETE"}
               </h1>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 font-mono">
+              <p className="text-[10px] font-medium lowercase tracking-wider text-zinc-400 font-mono">
                 NET_ID // {user?.email}
               </p>
             </div>
