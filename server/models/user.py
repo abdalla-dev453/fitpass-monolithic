@@ -1,6 +1,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
+from server.models import nutrition_profile
 
 
 class User(db.Model):
@@ -25,6 +26,7 @@ class User(db.Model):
     passes = db.relationship("Pass", back_populates="user", lazy="dynamic")
     bookings = db.relationship("Booking", back_populates="user", lazy="dynamic")
     food_logs = db.relationship("FoodLog", back_populates="user", lazy="dynamic")
+    nutrition_profile = db.relationship("NutritionProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
 
     # functions for setting and checking password
