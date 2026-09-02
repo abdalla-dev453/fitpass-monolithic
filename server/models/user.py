@@ -1,7 +1,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
-from server.models import nutrition_profile
+from models.nutrition_profile import NutritionProfile
 
 
 class User(db.Model):
