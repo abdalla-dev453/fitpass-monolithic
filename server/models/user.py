@@ -24,6 +24,7 @@ class User(db.Model):
     )
     passes = db.relationship("Pass", back_populates="user", lazy="dynamic")
     bookings = db.relationship("Booking", back_populates="user", lazy="dynamic")
+    food_logs = db.relationship("FoodLog", back_populates="user", lazy="dynamic")
 
 
     # functions for setting and checking password
