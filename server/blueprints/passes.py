@@ -4,6 +4,7 @@ from marshmallow import ValidationError
 
 from controllers.pass_controller import PassController
 from schemas.pass_schema import pass_schema, passes_schema, purchase_pass_schema
+from utils.idempotency import idempotent
 
 passes_bp = Blueprint("passes_bp", __name__)
 
@@ -21,7 +22,11 @@ def get_my_passes():
 
 @passes_bp.route("/purchase", methods=["POST"])
 @jwt_required()
+@idempotent("pass_purchase")
 def purchase_pass():
+    # A retried request (double-click, client retry after a timeout) that
+    # sends the same Idempotency-Key header replays the original response
+    # via @idempotent instead of creating a second Pass row / double-charge.
     json_data = request.get_json(silent=True)
     try:
         data = purchase_pass_schema.load(json_data)
