@@ -189,14 +189,14 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center border border-zinc-800/80 bg-zinc-950/20 text-gray-300 font-bold uppercase tracking-widest py-3 rounded-xl text-[10px] hover:text-white hover:border-zinc-700 transition-colors duration-200"
                 >
-                  ACCESS GATEWAY
+                  LOGIN ACCESS
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center bg-[#CCFF00] text-black font-black uppercase tracking-widest py-3 rounded-xl text-[10px] hover:bg-white shadow-[0_4px_12px_rgba(204,255,0,0.1)] transition-all duration-200"
                 >
-                  INITIALIZE ACCOUNT PASSPORT
+                  REGISTER AN ACCOUNT
                 </Link>
               </div>
             )}
