@@ -6,6 +6,11 @@ from marshmallow import ValidationError
 from extensions import db, jwt, cors, migrate, ma
 
 # Import models so Flask-Migrate picks them up
+# FIX: pass_plan, food_item, food_log, nutrition_profile, waitlist,
+# idempotency_key, and discovery_cache existed as files but were never
+# imported here -- Flask-Migrate's autogenerate only sees models that have
+# actually been imported into a module SQLAlchemy has loaded, so none of
+# these tables were ever created by a migration.
 from models import (
     user,
     studio,
@@ -13,7 +18,14 @@ from models import (
     class_category,
     fitness_class,
     pass_model,
+    pass_plan,
     booking,
+    waitlist,
+    idempotency_key,
+    food_item,
+    food_log,
+    nutrition_profile,
+    discovery_cache,
 )
 from models.studio import Studio
 from models.class_category import ClassCategory
@@ -25,6 +37,12 @@ from blueprints.classes import classes_bp
 from blueprints.passes import passes_bp
 from blueprints.bookings import bookings_bp
 from blueprints.trainers import trainers_bp
+# FIX: discovery_bp existed but was never imported/registered -- partly
+# because its own imports were broken (see blueprints/discovery.py), which
+# would have crashed the app on boot the moment someone tried to register it.
+from blueprints.discovery import discovery_bp
+from blueprints.nutrition import nutrition_bp
+from controllers.pass_controller import PassController
 
 load_dotenv()
 
@@ -123,6 +141,18 @@ def create_app():
     # FIX: this blueprint was imported but never registered, so GET /trainers
     # always returned 404 in every environment.
     app.register_blueprint(trainers_bp, url_prefix="/trainers")
+    app.register_blueprint(discovery_bp, url_prefix="/discovery")
+    app.register_blueprint(nutrition_bp, url_prefix="/nutrition")
+
+    with app.app_context():
+        # Seeds pass_plans on first boot only (no-op once any plan exists) --
+        # see PassController.ensure_default_plans for details.
+        try:
+            PassController.ensure_default_plans()
+        except Exception:
+            # Table may not exist yet on a brand-new environment before the
+            # first `flask db upgrade` runs -- don't crash app boot over it.
+            pass
 
     # Global Error Handlers
     @app.errorhandler(404)

@@ -15,8 +15,16 @@ class ClassController:
         q=None,
         start_date=None,
         end_date=None,
+        page=None,
+        per_page=None,
     ):
-        """Search fitness classes with optional filtering."""
+        """Search fitness classes with optional filtering.
+
+        page/per_page are optional -- omit both to get the previous
+        unpaginated behavior (a plain list), or pass them to get
+        {items, page, per_page, total, has_more} instead. Keeping both
+        response shapes lets the frontend adopt pagination incrementally.
+        """
         query = FitnessClass.query
 
         query = query.filter(FitnessClass.start_time >= (start_date or datetime.utcnow()))
@@ -34,7 +42,22 @@ class ClassController:
                 or_(FitnessClass.title.ilike(like), FitnessClass.description.ilike(like))
             )
 
-        return query.order_by(FitnessClass.start_time.asc()).all()
+        query = query.order_by(FitnessClass.start_time.asc())
+
+        if not page and not per_page:
+            return query.all()
+
+        page = max(page or 1, 1)
+        per_page = min(max(per_page or 20, 1), 100)
+        total = query.count()
+        items = query.offset((page - 1) * per_page).limit(per_page).all()
+        return {
+            "items": items,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "has_more": page * per_page < total,
+        }
 
     @classmethod
     def get_class_by_id(cls, class_id):
