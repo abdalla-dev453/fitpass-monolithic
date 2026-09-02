@@ -8,6 +8,9 @@ class Studio(db.Model):
     name = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
+    source = db.Column(db.String, default="internal")   
+    external_place_id = db.Column(db.String, unique=True, nullable=True)
+    claimed_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     classes = db.relationship("FitnessClass", back_populates="studio", lazy="dynamic")
 

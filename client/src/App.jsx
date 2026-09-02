@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { AppProvider } from "./context/AppContext.jsx";
 import MainLayout from "./layouts/MainLayout.jsx";
 import Home from "./pages/Home.jsx";
 import Classes from "./pages/Classes.jsx";
@@ -18,7 +17,6 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function App() {
   return (
-    <AppProvider>
       <Routes>
         <Route element={<MainLayout />}>
           
@@ -58,6 +56,5 @@ export default function App() {
           
         </Route>
       </Routes>
-    </AppProvider>
   );
 }

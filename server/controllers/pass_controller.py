@@ -10,16 +10,16 @@ PASS_PLANS = {
 
 
 class PassController:
-    @classmethod
-    def list_plans(cls):
+    @staticmethod
+    def list_plans():
         return [{"key": key, **plan} for key, plan in PASS_PLANS.items()]
 
-    @classmethod
-    def get_user_passes(cls, user_id):
+    @staticmethod
+    def get_user_passes(user_id: int) -> list[Pass]:
         return Pass.query.filter_by(user_id=user_id).order_by(Pass.purchased_at.desc()).all()
 
-    @classmethod
-    def purchase_plan(cls, user_id, plan_key):
+    @staticmethod
+    def purchase_plan(user_id: int, plan_key: str):
         plan = PASS_PLANS.get(plan_key)
         if not plan:
             return None
@@ -37,8 +37,8 @@ class PassController:
         db.session.commit()
         return purchased
 
-    @classmethod
-    def get_active_pass(cls, user_id):
+    @staticmethod
+    def get_active_pass(user_id: int):
         now = datetime.utcnow()
         return (
             Pass.query.filter(

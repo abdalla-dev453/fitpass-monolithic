@@ -16,7 +16,7 @@ def get_pass_plans():
 def get_my_passes():
     user_id = get_jwt_identity()
     user_passes = PassController.get_user_passes(user_id)
-    return jsonify(passes_schema.dump(user_passes)), 200
+    return jsonify(passes_schema.dump(user_passes, many=True)), 200
 
 
 @passes_bp.route("/purchase", methods=["POST"])

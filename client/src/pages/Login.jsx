@@ -4,7 +4,6 @@ import { useApp } from "../context/AppContext.jsx";
 import { ArrowRight, ShieldAlert, KeyRound, Mail } from "lucide-react";
 
 export default function Login() {
-  // Destructure user to check if they are already logged in
   const { login, user, showToast } = useApp();
   const navigate = useNavigate();
 
