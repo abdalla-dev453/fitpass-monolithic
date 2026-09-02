@@ -247,3 +247,16 @@ Walking one request all the way through, end to end, ties the whole picture toge
 Every layer in this repo — schema, controller, model, context, API client,
 route guard — touches this one signup in some way, which is why a bug in any single
 layer (as several were, prior to the recent fixes) breaks the whole flow.
+
+### NEW FEATURES ADDED TO MY WEBSITE
+<!-- 1. Nutrition features -->
+<!-- 2.Geographical location of the studios  -->
+
+
+<!-- NUTRITION ENDPOINTS -> NEW FEATURES -->
+GET  /nutrition/profile              # current targets
+PUT  /nutrition/profile              # update goal/targets
+GET  /nutrition/foods/search?q=      # search cached + external food DB
+POST /nutrition/logs                 # log an eaten item
+GET  /nutrition/logs?date=           # a day's entries
+GET  /nutrition/summary?range=week   # aggregated calories/macros vs. target, streaks

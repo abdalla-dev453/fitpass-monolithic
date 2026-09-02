@@ -86,7 +86,7 @@ def create_app():
     migrate.init_app(app, db)
     ma.init_app(app)
 
-    seed_default_data(app)
+    # seed_default_data(app)
 
     # ONE SOURCE OF TRUTH CORS CONFIGURATION
     cors_origins = os.getenv(

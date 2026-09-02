@@ -12,5 +12,6 @@ class StudioSchema(ma.SQLAlchemyAutoSchema):
     location = fields.String(required=True, validate=validate.Length(min=5, max=255))
 
 
+
 studio_schema = StudioSchema()
 studios_schema = StudioSchema(many=True)
