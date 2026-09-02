@@ -3,7 +3,6 @@ from flask import Flask, jsonify
 from dotenv import load_dotenv
 from marshmallow import ValidationError
 
-# Fixed: Removed the leading dots to convert from relative to absolute imports
 from extensions import db, jwt, cors, migrate, ma
 
 # Import models so Flask-Migrate picks them up

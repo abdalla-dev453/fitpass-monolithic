@@ -9,9 +9,6 @@ class UserController:
 
     @classmethod
     def register_user(cls, data):
-        # Admin accounts must be provisioned by a trusted administrator. A
-        # trainer account is safe to self-register, but receives only control
-        # of classes assigned to that trainer profile.
         role = data.get("role") if data.get("role") in ("client", "trainer") else "client"
 
         user = User(
