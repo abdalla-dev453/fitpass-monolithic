@@ -19,11 +19,12 @@ export default function Navbar() {
     { path: "/", label: "HOME", visible: true },
     { path: "/about", label: "ABOUT", visible: true },
     { path: "/pricing", label: "PRICING", visible: true },
+    { path: "/nearby-gyms", label: "NEARBY GYMS", visible: !!user },
+
     
     // Protected Routes - require login, open to everyone logged in
     { path: "/studios", label: "STUDIOS", visible: !!user },
     { path: "/nutrition", label: "NUTRITION", visible: !!user },
-    { path: "/nearby-gyms", label: "NEARBY GYMS", visible: !!user },
     
     // Trainer or Admin clearance flags
     { 

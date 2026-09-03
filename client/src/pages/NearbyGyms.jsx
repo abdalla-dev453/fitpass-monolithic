@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { MapPin, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { MapPin, AlertCircle, RefreshCw, Loader2, Search } from "lucide-react";
 import SectionHeading from "../components/SectionHeading.jsx";
 import api from "../lib/api.js";
 
-// SCAFFOLD: wired to GET /discovery/nearby. Styling kept minimal on
-// purpose -- swap the markup below for StudioCard-style layout to match
-// the rest of the app once the feature is validated.
 export default function NearbyGyms() {
   const [status, setStatus] = useState("idle"); // idle | locating | loading | ready | error
   const [error, setError] = useState(null);
@@ -41,8 +38,39 @@ export default function NearbyGyms() {
         setError("Location access denied. Try the manual search below.");
         setStatus("error");
       },
-      { timeout: 8000 },
+      { timeout: 8000 }
     );
+  }
+
+  // Geocode manual text address to lat/lng and fetch nearby gyms
+  async function handleManualSearch(e) {
+    e.preventDefault();
+    if (!manualLocation.trim()) return;
+
+    setStatus("loading");
+    setError(null);
+
+    try {
+      // Free geocoding lookup via OpenStreetMap Nominatim
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          manualLocation
+        )}`
+      );
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        setError("Location not found. Please try a different city or address.");
+        setStatus("error");
+        return;
+      }
+
+      const { lat, lon } = data[0];
+      fetchNearby(parseFloat(lat), parseFloat(lon));
+    } catch (err) {
+      setError("Failed to geocode location. Check your internet connection.");
+      setStatus("error");
+    }
   }
 
   useEffect(() => {
@@ -62,22 +90,29 @@ export default function NearbyGyms() {
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <button
             onClick={useMyLocation}
-            className="inline-flex items-center gap-2 border-2 border-[#CCFF00] text-[#CCFF00] font-black uppercase text-xs px-5 py-3"
+            type="button"
+            className="inline-flex items-center justify-center gap-2 border-2 border-[#CCFF00] text-[#CCFF00] font-black uppercase text-xs px-5 py-3 shrink-0 hover:bg-[#CCFF00] hover:text-black transition-colors"
           >
             <MapPin size={14} /> Use my location
           </button>
-          <div className="flex-1 flex gap-2">
+
+          {/* Form wrapper allows submitting via both button click and Enter key */}
+          <form onSubmit={handleManualSearch} className="flex-1 flex gap-2">
             <input
+              type="text"
               value={manualLocation}
               onChange={(e) => setManualLocation(e.target.value)}
               placeholder="Or type a city / address..."
-              className="flex-1 bg-zinc-950 border-2 border-zinc-800 px-4 py-3 text-xs uppercase tracking-widest text-white placeholder:text-zinc-600"
+              className="flex-1 bg-zinc-950 border-2 border-zinc-800 px-4 py-3 text-xs uppercase tracking-widest text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#CCFF00]"
             />
-            {/* NOTE: manual text search needs a geocoding step (e.g. Google
-               Geocoding API) to turn this into lat/lng before calling
-               getNearbyGyms -- left as a follow-up since it's a separate
-               integration from the nearby-search feature itself. */}
-          </div>
+            <button
+              type="submit"
+              disabled={status === "loading" || status === "locating"}
+              className="inline-flex items-center gap-2 bg-[#CCFF00] text-black font-black uppercase text-xs px-6 py-3 shrink-0 hover:bg-[#b3e600] disabled:opacity-50 transition-colors"
+            >
+              <Search size={14} /> Search
+            </button>
+          </form>
         </div>
 
         {status === "locating" || status === "loading" ? (
@@ -91,7 +126,10 @@ export default function NearbyGyms() {
           <div className="mt-16 flex items-center gap-3 text-red-400 text-xs uppercase tracking-widest">
             <AlertCircle size={16} />
             {error}
-            <button onClick={useMyLocation} className="underline ml-2 inline-flex items-center gap-1">
+            <button
+              onClick={useMyLocation}
+              className="underline ml-2 inline-flex items-center gap-1 hover:text-red-300"
+            >
               <RefreshCw size={12} /> Retry
             </button>
           </div>
@@ -136,7 +174,7 @@ export default function NearbyGyms() {
                       <p className="font-black uppercase">{g.name}</p>
                       <p className="text-zinc-500 text-xs mt-1">{g.address}</p>
                     </div>
-                    <button className="text-[#CCFF00] text-[10px] font-black uppercase border border-[#CCFF00] px-3 py-2 shrink-0">
+                    <button className="text-[#CCFF00] text-[10px] font-black uppercase border border-[#CCFF00] px-3 py-2 shrink-0 hover:bg-[#CCFF00] hover:text-black transition-colors">
                       Request this gym
                     </button>
                   </div>

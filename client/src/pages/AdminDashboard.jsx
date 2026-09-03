@@ -4,6 +4,7 @@ import api from "../lib/api";
 
 const emptyClass = {
   title: "",
+  description: "", // Added description field
   studio_id: "",
   category_id: "",
   trainer_id: "",
@@ -32,9 +33,17 @@ export default function AdminDashboard({ trainerMode = false }) {
   const [categories, setCategories] = useState([]);
   const [trainers, setTrainers] = useState([]);
   const [tab, setTab] = useState("classes");
+
   const [classForm, setClassForm] = useState(emptyClass);
+  const [editingClassId, setEditingClassId] = useState(null);
+
   const [studioForm, setStudioForm] = useState(emptyStudio);
   const [busy, setBusy] = useState(false);
+
+  // Expanded class tracking for booking management
+  const [expandedClassId, setExpandedClassId] = useState(null);
+  const [classBookings, setClassBookings] = useState({});
+  const [addMemberEmail, setAddMemberEmail] = useState("");
 
   const load = async () => {
     try {
@@ -46,12 +55,11 @@ export default function AdminDashboard({ trainerMode = false }) {
       if (!trainerMode) baseRequests.push(api.getTrainers());
       const [classData, studioData, categoryData, trainerData = []] =
         await Promise.all(baseRequests);
-      // The API still exposes the public timetable, but a trainer's workspace
-      // only presents classes they are authorised to manage.
+
       setClasses(
         trainerMode
           ? classData.filter((item) => item.trainer_name === user?.full_name)
-          : classData,
+          : classData
       );
       setStudios(studioData);
       setCategories(categoryData);
@@ -65,7 +73,46 @@ export default function AdminDashboard({ trainerMode = false }) {
     load();
   }, [trainerMode, user?.full_name]);
 
-  const createClass = async (event) => {
+  // Load bookings for a specific class when expanded
+  const toggleExpandClass = async (classId) => {
+    if (expandedClassId === classId) {
+      setExpandedClassId(null);
+      return;
+    }
+    setExpandedClassId(classId);
+    fetchClassBookings(classId);
+  };
+
+  const fetchClassBookings = async (classId) => {
+    try {
+      const bookings = await api.getClassBookings(classId);
+      setClassBookings((prev) => ({ ...prev, [classId]: bookings }));
+    } catch (error) {
+      showToast(error.message || "Could not load bookings for this class.");
+    }
+  };
+
+  const handleEditClick = (cls) => {
+    setEditingClassId(cls.id);
+    setClassForm({
+      title: cls.title || "",
+      description: cls.description || "", // Populates description when editing
+      studio_id: cls.studio_id || "",
+      category_id: cls.category_id || "",
+      trainer_id: cls.trainer_id || "",
+      image_url: cls.image_url || "",
+      capacity: cls.capacity || "",
+      start_time: cls.start_time ? cls.start_time.slice(0, 16) : "",
+      end_time: cls.end_time ? cls.end_time.slice(0, 16) : "",
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingClassId(null);
+    setClassForm(emptyClass);
+  };
+
+  const saveClass = async (event) => {
     event.preventDefault();
     setBusy(true);
     try {
@@ -77,12 +124,19 @@ export default function AdminDashboard({ trainerMode = false }) {
       };
       if (!trainerMode) payload.trainer_id = Number(classForm.trainer_id);
       else delete payload.trainer_id;
-      await api.createClass(payload);
-      setClassForm(emptyClass);
-      showToast("Class created.");
+
+      if (editingClassId) {
+        await api.updateClass(editingClassId, payload);
+        showToast("Class updated successfully.");
+      } else {
+        await api.createClass(payload);
+        showToast("Class created.");
+      }
+
+      cancelEdit();
       await load();
     } catch (error) {
-      showToast(error.message || "Could not create class.");
+      showToast(error.message || "Could not save class.");
     } finally {
       setBusy(false);
     }
@@ -125,8 +179,33 @@ export default function AdminDashboard({ trainerMode = false }) {
     }
   };
 
+  const handleAddMember = async (e, classId) => {
+    e.preventDefault();
+    if (!addMemberEmail) return;
+    try {
+      await api.addMemberToClass(classId, { email: addMemberEmail });
+      showToast("Member added to class.");
+      setAddMemberEmail("");
+      fetchClassBookings(classId);
+    } catch (error) {
+      showToast(error.message || "Could not add member.");
+    }
+  };
+
+  const handleRemoveMember = async (classId, bookingId) => {
+    if (!window.confirm("Remove this member from the class?")) return;
+    try {
+      await api.removeBooking(bookingId);
+      showToast("Member removed.");
+      fetchClassBookings(classId);
+    } catch (error) {
+      showToast(error.message || "Could not remove member.");
+    }
+  };
+
   const field =
     "w-full bg-zinc-900 border border-zinc-700 px-3 py-3 text-sm text-white focus:outline-none focus:border-[#CCFF00]";
+
   return (
     <main className="min-h-screen bg-[#0B0B0C] pt-28 px-6 pb-16 text-white">
       <div className="max-w-6xl mx-auto">
@@ -151,13 +230,28 @@ export default function AdminDashboard({ trainerMode = false }) {
             </button>
           )}
         </div>
+
         {tab === "classes" && (
           <section className="mt-8 grid gap-8 lg:grid-cols-[420px_1fr]">
             <form
-              onSubmit={createClass}
-              className="space-y-4 border border-zinc-800 bg-zinc-950 p-6"
+              onSubmit={saveClass}
+              className="space-y-4 border border-zinc-800 bg-zinc-950 p-6 h-fit"
             >
-              <h2 className="text-white uppercase">Create a class</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-white uppercase font-bold">
+                  {editingClassId ? "Edit Class" : "Create a class"}
+                </h2>
+                {editingClassId && (
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="text-xs text-zinc-400 underline"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+
               <input
                 required
                 className={field}
@@ -165,6 +259,14 @@ export default function AdminDashboard({ trainerMode = false }) {
                 value={classForm.title}
                 onChange={(e) =>
                   setClassForm({ ...classForm, title: e.target.value })
+                }
+              />
+              <textarea
+                className={`${field} rows-3 resize-none`}
+                placeholder="Class description (optional)"
+                value={classForm.description}
+                onChange={(e) =>
+                  setClassForm({ ...classForm, description: e.target.value })
                 }
               />
               <select
@@ -196,7 +298,7 @@ export default function AdminDashboard({ trainerMode = false }) {
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
-                  ),
+                  )
                 )}
               </select>
               <input
@@ -260,36 +362,129 @@ export default function AdminDashboard({ trainerMode = false }) {
                 />
               </label>
               <button disabled={busy} className="btn-primary w-full">
-                {busy ? "Saving..." : "Create class"}
+                {busy
+                  ? "Saving..."
+                  : editingClassId
+                  ? "Update class"
+                  : "Create class"}
               </button>
             </form>
+
             <div className="space-y-3">
-              <h2 className="text-yellow-500 uppercase">Scheduled classes</h2>
+              <h2 className="text-yellow-500 uppercase font-bold">
+                Scheduled classes
+              </h2>
               {classes.map((item) => (
                 <article
                   key={item.id}
                   className="border border-zinc-800 bg-zinc-950 p-5"
                 >
-                  <div className="flex justify-between gap-4">
+                  <div className="flex justify-between items-start gap-4">
                     <div>
                       <h3 className="font-bold text-[#CCFF00]">{item.title}</h3>
+                      {item.description && (
+                        <p className="mt-1 text-xs text-zinc-300">
+                          {item.description}
+                        </p>
+                      )}
                       <p className="mt-1 text-sm text-zinc-400">
                         {item.studio_name} · {item.trainer_name} ·{" "}
                         {new Date(item.start_time).toLocaleString()}
                       </p>
                     </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleEditClick(item)}
+                        className="text-xs font-bold text-zinc-300 hover:text-white"
+                      >
+                        EDIT
+                      </button>
+                      <button
+                        onClick={() => removeClass(item.id)}
+                        className="text-xs font-bold text-red-400"
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-zinc-900 flex justify-between items-center">
                     <button
-                      onClick={() => removeClass(item.id)}
-                      className="text-xs font-bold text-red-400"
+                      onClick={() => toggleExpandClass(item.id)}
+                      className="text-xs uppercase font-bold text-zinc-400 hover:text-[#CCFF00]"
                     >
-                      DELETE
+                      {expandedClassId === item.id
+                        ? "Hide Members"
+                        : "View Enrolled Members"}
                     </button>
                   </div>
+
+                  {/* Expanded Section for Bookings/Members */}
+                  {expandedClassId === item.id && (
+                    <div className="mt-4 p-4 border border-zinc-800 bg-zinc-900/50 space-y-4">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-zinc-300">
+                        Enrolled Members
+                      </h4>
+
+                      {/* Add Member Form */}
+                      <form
+                        onSubmit={(e) => handleAddMember(e, item.id)}
+                        className="flex gap-2"
+                      >
+                        <input
+                          type="email"
+                          required
+                          placeholder="Member Email"
+                          className="flex-1 bg-zinc-950 border border-zinc-700 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#CCFF00]"
+                          value={addMemberEmail}
+                          onChange={(e) => setAddMemberEmail(e.target.value)}
+                        />
+                        <button
+                          type="submit"
+                          className="bg-[#CCFF00] text-black text-xs font-bold px-3 py-1.5 uppercase shrink-0"
+                        >
+                          Add Member
+                        </button>
+                      </form>
+
+                      {/* Members List */}
+                      <div className="space-y-2 mt-2">
+                        {(!classBookings[item.id] ||
+                          classBookings[item.id].length === 0) && (
+                          <p className="text-xs text-zinc-500">
+                            No members booked yet.
+                          </p>
+                        )}
+                        {classBookings[item.id]?.map((booking) => (
+                          <div
+                            key={booking.id}
+                            className="flex justify-between items-center bg-zinc-950 border border-zinc-800 p-2 text-xs"
+                          >
+                            <div>
+                              <p className="font-bold text-white">
+                                {booking.user_name || booking.user_email}
+                              </p>
+                              <p className="text-zinc-500">{booking.user_email}</p>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleRemoveMember(item.id, booking.id)
+                              }
+                              className="text-[10px] font-bold text-red-400 uppercase"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
           </section>
         )}
+
         {tab === "studios" && (
           <section className="mt-8 grid gap-8 lg:grid-cols-[420px_1fr]">
             <form
