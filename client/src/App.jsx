@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Register from "./pages/Register.jsx";
 import NearbyGyms from "./pages/NearbyGyms.jsx";
 import Nutrition from "./pages/Nutrition.jsx";
+import Watch from "./pages/Watch.jsx";
 
 // Import your custom security wrapper
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/studios" element={<Studios />} />
           <Route path="/classes" element={<Classes />} />
           <Route path="/nearby-gyms" element={<NearbyGyms />} />
+          <Route path="/watch" element={<Watch />} />
 
           {/* --- ANY AUTHENTICATED USER (Client, Trainer, Admin) --- */}
           <Route element={<ProtectedRoute allowedRoles={["client", "trainer", "admin"]} />}>

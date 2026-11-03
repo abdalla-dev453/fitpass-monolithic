@@ -16,6 +16,7 @@ export default function Classes() {
   const [classes, setClasses] = useState([]);
   const [status, setStatus] = useState("loading");
   const [retryToken, setRetryToken] = useState(0);
+  const [sortBy, setSortBy] = useState("time"); // "time" | "spots" | "title"
 
   useEffect(() => {
     api.getCategories().then(setCategories).catch(() => setCategories([]));
@@ -42,7 +43,8 @@ export default function Classes() {
       .getClasses({ category_id: categoryId, studio_id: studioId, q: searchQuery || undefined })
       .then((data) => {
         if (!cancelled) {
-          setClasses(data);
+          const items = Array.isArray(data) ? data : (data?.items || []);
+          setClasses(items);
           setStatus("ready");
         }
       })
@@ -54,6 +56,20 @@ export default function Classes() {
       cancelled = true;
     };
   }, [categoryId, studioId, searchQuery, retryToken]);
+
+  const sortedClasses = useMemo(() => {
+    const list = [...classes];
+    if (sortBy === "time") {
+      return list.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+    }
+    if (sortBy === "spots") {
+      return list.sort((a, b) => (b.spots_remaining ?? 0) - (a.spots_remaining ?? 0));
+    }
+    if (sortBy === "title") {
+      return list.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    }
+    return list;
+  }, [classes, sortBy]);
 
   const clearStudioFilter = () => {
     searchParams.delete("studio_id");
@@ -78,7 +94,7 @@ export default function Classes() {
           <div className="border-b-4 border-zinc-800 pb-6">
             <SectionHeading
               eyebrow="LIVE DISPATCH TRACKER"
-              title="EVERY WORKOUT SLT. EVERY BOX STATION. RIGHT NOW."
+              title="EVERY WORKOUT SLOT. EVERY BOX STATION. RIGHT NOW."
               description="FILTER BY INTENSITY CATEGORY, QUERIES BY DISCIPLINE NAME, OR ENFORCE REQUISITES BY TARGET PARTNER STATIONS."
             />
 
@@ -117,24 +133,40 @@ export default function Classes() {
               />
             </div>
 
-            {/* Sharp Geometric Filter Grid Blocks */}
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mr-2 hidden sm:inline-flex items-center gap-1.5">
-                <Filter size={12} strokeWidth={2.5} /> CATEGORIES:
-              </span>
-              {pills.map((name) => (
-                <button
-                  key={name}
-                  onClick={() => setActiveCategory(name)}
-                  className={`rounded-none px-5 py-2.5 text-xs font-black uppercase tracking-widest border transition-all duration-100 ${
-                    activeCategory === name
-                      ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                      : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-white"
-                  }`}
+            {/* Controls right: Categories & Sort */}
+            <div className="flex flex-wrap gap-3 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mr-1 hidden sm:inline-flex items-center gap-1.5">
+                  <Filter size={12} strokeWidth={2.5} /> CATEGORIES:
+                </span>
+                {pills.map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => setActiveCategory(name)}
+                    className={`rounded-none px-4 py-2 text-xs font-black uppercase tracking-widest border transition-all duration-100 ${
+                      activeCategory === name
+                        ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                        : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-white"
+                    }`}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sort Selector */}
+              <div className="border border-zinc-800 bg-zinc-950 px-3 py-1.5 flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase text-zinc-500">SORT:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-xs font-black uppercase text-[#CCFF00] focus:outline-none"
                 >
-                  {name}
-                </button>
-              ))}
+                  <option value="time" className="bg-zinc-900 text-white">SOONEST FIRST</option>
+                  <option value="spots" className="bg-zinc-900 text-white">MOST SPOTS</option>
+                  <option value="title" className="bg-zinc-900 text-white">NAME A-Z</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -184,9 +216,9 @@ export default function Classes() {
             )}
 
             {/* Clean Result Presentation Layout Grid */}
-            {status === "ready" && classes.length > 0 && (
+            {status === "ready" && sortedClasses.length > 0 && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {classes.map((c) => (
+                {sortedClasses.map((c) => (
                   <div key={c.id} className="transition-transform transform hover:-translate-y-1">
                     <ClassCard fitnessClass={c} />
                   </div>

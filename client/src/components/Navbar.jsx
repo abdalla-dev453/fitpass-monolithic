@@ -17,26 +17,20 @@ export default function Navbar() {
   // Base navigation schema with visibility parameters mapped to clearance levels
   const navLinks = [
     { path: "/", label: "HOME", visible: true },
-    { path: "/about", label: "ABOUT", visible: true },
-    { path: "/pricing", label: "PRICING", visible: true },
-    { path: "/nearby-gyms", label: "NEARBY GYMS", visible: !!user },
+    { path: "/classes", label: "CLASSES", visible: true },
+    { path: "/studios", label: "STUDIOS", visible: true },
+    { path: "/nearby-gyms", label: "RADAR DISCOVERY", visible: true },
+    { path: "/watch", label: "WATCH MOVIES", visible: true },
+    { path: "/pricing", label: "PASS TIERS", visible: true },
+    { path: "/about", label: "MANIFESTO", visible: true },
 
-    
-    // Protected Routes - require login, open to everyone logged in
-    { path: "/studios", label: "STUDIOS", visible: !!user },
+    // Authenticated Features
     { path: "/nutrition", label: "NUTRITION", visible: !!user },
-    
+
     // Trainer or Admin clearance flags
     { 
-      path: "/classes", 
-      label: "CLASSES COMMAND", 
-      visible: true
-    },
-    
-    // Strict admin override route placeholder
-    { 
       path: "/admin-dashboard", 
-      label: "CORE CONTROL", 
+      label: "ADMIN CONTROL", 
       visible: user && user.role === "admin" 
     },
     {

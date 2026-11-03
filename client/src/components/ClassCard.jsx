@@ -36,8 +36,8 @@ export default function ClassCard({ fitnessClass }) {
 
     setIsBooking(true);
     try {
-      await api.createBooking(fitnessClass.id);
-      showToast("Your class reservation is confirmed.");
+      const res = await api.createBooking(fitnessClass.id);
+      showToast(res?.message || (isFull ? "Added to waitlist." : "Your class reservation is confirmed."));
     } catch (error) {
       showToast(error.message || "Unable to reserve this class.");
     } finally {
@@ -83,12 +83,12 @@ export default function ClassCard({ fitnessClass }) {
           <span
             className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border ${
               isFull
-                ? "bg-red-950/40 text-red-500 border-red-900/60 animate-pulse"
+                ? "bg-amber-950/40 text-amber-400 border-amber-800/60"
                 : "bg-zinc-900 text-zinc-400 border-zinc-800"
             }`}
           >
             <Users size={11} strokeWidth={2.5} />
-            {isFull ? "FULL CAPACITY" : `${spots ?? "—"} SPOTS REMAINING`}
+            {isFull ? "WAITLIST OPEN" : `${spots ?? "—"} SPOTS REMAINING`}
           </span>
         </div>
 
@@ -130,18 +130,18 @@ export default function ClassCard({ fitnessClass }) {
 
       {/* HEAVY INTENSITY FOOTER RESERVATION ACTION BUTTON */}
       <button
-        disabled={isFull || isBooking}
+        disabled={isBooking}
         onClick={reserveSpot}
-        className={`w-full py-3.5 font-display text-xs font-black uppercase tracking-widest transition-all duration-100 border-t-2 border-transparent ${
+        className={`w-full py-3.5 font-display text-xs font-black uppercase tracking-widest transition-all duration-100 border-t-2 ${
           isFull
-            ? "bg-zinc-900 text-zinc-600 cursor-not-allowed border-zinc-900"
+            ? "bg-zinc-900 text-[#CCFF00] border-zinc-800 hover:bg-[#CCFF00] hover:text-black"
             : "bg-[#CCFF00] text-black border-[#CCFF00] hover:bg-white hover:text-black hover:border-white"
         }`}
       >
-        {isFull
-          ? "STATION CAPACITY FULL"
-          : isBooking
-            ? "RESERVING..."
+        {isBooking
+          ? "PROCESSING..."
+          : isFull
+            ? "JOIN PRIORITY WAITLIST"
             : "RESERVE ACCOUNT SPOT"}
       </button>
     </div>

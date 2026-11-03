@@ -10,8 +10,8 @@
   
   --color-gym-neon: #CCFF00;
   --color-gym-dark: #000000;
-  --color-gym-surface: #FFFFFF;
-  --color-gym-concrete: #F4F4F5;
+  --color-gym-surface: #0B0C10;
+  --color-gym-concrete: #18181B;
   --color-gym-crimson: #FF1E27;
 
   /* Hard-Driving Animation Presets */
@@ -36,19 +36,20 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: var(--color-gym-surface);
+    background-color: #0B0C10;
+    color: #FFFFFF;
   }
 
   body {
-    @apply text-black antialiased selection:bg-black selection:text-gym-neon;
+    @apply text-white antialiased selection:bg-[#CCFF00] selection:text-black;
     font-family: var(--font-sans);
-    background-color: var(--color-gym-surface);
+    background-color: #0B0C10;
   }
 
     /* Aggressive Uppercase Header Standards Across App */
   h1, h2, h3, h4, .gym-title {
     font-family: var(--font-display);
-    @apply uppercase tracking-tight font-black text-black;
+    @apply uppercase tracking-tight font-black text-white;
     font-stretch: 90%; /* Fixed: Set as native CSS instead of an invalid utility */
   }
 

@@ -8,6 +8,7 @@ import CtaBanner from "../components/CtaBanner.jsx";
 import SectionHeading from "../components/SectionHeading.jsx";
 import ClassCard from "../components/ClassCard.jsx";
 import PricingCard from "../components/PricingCard.jsx";
+import pricingBanner from "../assets/pricing.jpeg";
 import api from "../lib/api.js";
 
 const FALLBACK_PLANS = [
@@ -30,7 +31,8 @@ function ClassesPreview() {
     api
       .getClasses()
       .then((data) => {
-        setClasses(data.slice(0, 3));
+        const items = Array.isArray(data) ? data : (data?.items || []);
+        setClasses(items.slice(0, 3));
         setStatus("ready");
       })
       .catch(() => setStatus("error"));
@@ -122,7 +124,7 @@ function PricingPreview() {
     <section 
       className="relative py-32 bg-cover bg-center bg-no-repeat bg-fixed select-none border-b-2 border-zinc-900"
       style={{ 
-        backgroundImage: `linear-gradient(to bottom, rgba(11, 12, 16, 0.92), rgba(11, 12, 16, 0.85)), url('https://unsplash.com')` 
+        backgroundImage: `linear-gradient(to bottom, rgba(11, 12, 16, 0.92), rgba(11, 12, 16, 0.85)), url(${pricingBanner})` 
       }}
     >
       <div className="max-w-5xl mx-auto px-6 lg:px-8 relative z-10">

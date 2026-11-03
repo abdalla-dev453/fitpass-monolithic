@@ -7,6 +7,8 @@ class BookingSchema(ma.SQLAlchemyAutoSchema):
     class_title = fields.String(attribute="fitness_class.title", dump_only=True)
     start_time = fields.DateTime(attribute="fitness_class.start_time", dump_only=True)
     studio_name = fields.String(attribute="fitness_class.studio.name", dump_only=True)
+    user_name = fields.String(attribute="user.full_name", dump_only=True)
+    user_email = fields.String(attribute="user.email", dump_only=True)
 
     class Meta:
         model = Booking

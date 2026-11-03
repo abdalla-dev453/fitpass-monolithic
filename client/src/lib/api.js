@@ -123,6 +123,23 @@ const api = {
     }),
   cancelBooking: (bookingId) =>
     request(`/bookings/${bookingId}/cancel`, { method: "POST" }),
+  removeBooking: (bookingId) =>
+    request(`/bookings/${bookingId}`, { method: "DELETE" }),
+  submitReview: (bookingId, payload) =>
+    request(`/bookings/${bookingId}/review`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  getMyWaitlist: () => request("/bookings/waitlist"),
+  leaveWaitlist: (waitlistId) =>
+    request(`/bookings/waitlist/${waitlistId}`, { method: "DELETE" }),
+
+  getClassBookings: (classId) => request(`/classes/${classId}/bookings`),
+  addMemberToClass: (classId, payload) =>
+    request(`/classes/${classId}/bookings`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   // --- Nearby gym discovery ---
   // studios: our own bookable catalog within range.

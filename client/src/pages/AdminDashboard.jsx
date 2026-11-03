@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useApp } from "../context/AppContext.jsx";
 import api from "../lib/api";
 
@@ -45,7 +45,7 @@ export default function AdminDashboard({ trainerMode = false }) {
   const [classBookings, setClassBookings] = useState({});
   const [addMemberEmail, setAddMemberEmail] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const baseRequests = [
         api.getClasses(),
@@ -56,22 +56,23 @@ export default function AdminDashboard({ trainerMode = false }) {
       const [classData, studioData, categoryData, trainerData = []] =
         await Promise.all(baseRequests);
 
+      const items = Array.isArray(classData) ? classData : (classData?.items || []);
       setClasses(
         trainerMode
-          ? classData.filter((item) => item.trainer_name === user?.full_name)
-          : classData
+          ? items.filter((item) => item.trainer_name === user?.full_name)
+          : items
       );
-      setStudios(studioData);
-      setCategories(categoryData);
-      setTrainers(trainerData);
+      setStudios(studioData || []);
+      setCategories(categoryData || []);
+      setTrainers(trainerData || []);
     } catch (error) {
       showToast(error.message || "Could not load management data.");
     }
-  };
+  }, [trainerMode, user?.full_name, showToast]);
 
   useEffect(() => {
     load();
-  }, [trainerMode, user?.full_name]);
+  }, [load]);
 
   // Load bookings for a specific class when expanded
   const toggleExpandClass = async (classId) => {

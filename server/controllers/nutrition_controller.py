@@ -12,7 +12,7 @@ class NutritionController:
 
     @staticmethod
     def get_or_create_profile(user_id):
-        profile = NutritionProfile.query.get(user_id)
+        profile = db.session.get(NutritionProfile, user_id)
         if not profile:
             profile = NutritionProfile(user_id=user_id, goal="maintain")
             db.session.add(profile)

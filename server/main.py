@@ -86,8 +86,8 @@ def create_app():
     app.url_map.strict_slashes = False
 
     # Configuration settings
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fallback-secret")
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-jwt-secret")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "fitpass-default-secret-production-key-32b")
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fitpass-jwt-default-secret-production-key-32b")
 
     # FIX: Normalize the database URL scheme. Some providers hand out
     # "postgres://" URLs, which SQLAlchemy 2.x rejects outright
@@ -125,7 +125,7 @@ def create_app():
             r"/*": {
                 "origins": allowed_origins,
                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+                "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Idempotency-Key"],
                 "expose_headers": ["Content-Type", "Authorization"],
             }
         },

@@ -39,7 +39,7 @@ export default function Studios() {
         
         {/* Giant structural background accent typography */}
         <div className="absolute top-12 left-1/2 -translate-x-1/2 font-display text-[12rem] font-black tracking-tighter text-zinc-900/10 pointer-events-none uppercase z-0">
-          STUODIOS
+          STUDIOS
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 z-10">
@@ -48,7 +48,7 @@ export default function Studios() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between pb-8 border-b-4 border-zinc-800 gap-6">
             <SectionHeading
               eyebrow="PARTNER NETWORK GRID"
-              title="STUODIO LOCATIONS ACTIVE TODAY."
+              title="STUDIO LOCATIONS ACTIVE TODAY."
               description="EVERY STATION LISTED BELOW ACCEPTS ALL FITPASS CREDIT PACK TIERS. ZERO INDEPENDENT ACCESS DEPOSITS CONTRACTS."
             />
 

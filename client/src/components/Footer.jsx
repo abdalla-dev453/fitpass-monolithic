@@ -9,7 +9,8 @@ const COLUMNS = [
     title: "THE NETWORK",
     links: [
       { label: "BROWSE SESSIONS", to: "/classes" },
-      { label: "ELITE STUDIOS", to: "/studios" }, // Fixed typo: STUODIOS -> STUDIOS
+      { label: "ELITE STUDIOS", to: "/studios" },
+      { label: "FITPASS THEATER", to: "/watch" },
       { label: "PRICING PLANS", to: "/pricing" },
       { label: "ABOUT THE PASS", to: "/about" },
     ],
